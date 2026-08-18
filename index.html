@@ -758,9 +758,16 @@
                     class="button secondary"
                     id="resetPromptBtn"
                 >
-                    ↺ Khôi phục mặc định
+                    ↺ Dùng Promt mặc định
                 </button>
 
+                <button
+                    type="button"
+                    id="downloadDefaultPromptBtn"
+                    class="btn btn-secondary"
+                    onclick="downloadDefaultPrompt()">
+                    ⬇ Tải prompt mẫu
+                </button>
             </div>
 
 
@@ -1236,6 +1243,59 @@
     src="script.js"
 ></script>
 
+
+<script>
+function downloadDefaultPrompt() {
+
+    // Lấy nội dung prompt đang hiển thị trong ô Prompt mẫu
+    const promptElement =
+        document.getElementById("promptTemplate");
+
+    if (!promptElement) {
+        alert("Không tìm thấy ô Prompt mẫu.");
+        return;
+    }
+
+    const content =
+        promptElement.value.trim();
+
+    if (!content) {
+        alert("Prompt mẫu đang trống.");
+        return;
+    }
+
+    // Tạo file TXT
+    const blob = new Blob(
+        [content],
+        {
+            type: "text/plain;charset=utf-8"
+        }
+    );
+
+    // Tạo đường dẫn tạm thời
+    const url =
+        URL.createObjectURL(blob);
+
+    // Tạo thẻ tải file
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "default-prompt.txt";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    // Dọn dẹp
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+}
+</script>
+    
 </body>
 
 </html>
