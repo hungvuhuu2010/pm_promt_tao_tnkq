@@ -1247,52 +1247,20 @@
 <script>
 function downloadDefaultPrompt() {
 
-    // Lấy nội dung prompt đang hiển thị trong ô Prompt mẫu
-    const promptElement =
-        document.getElementById("promptTemplate");
-
-    if (!promptElement) {
-        alert("Không tìm thấy ô Prompt mẫu.");
-        return;
-    }
-
-    const content =
-        promptElement.value.trim();
-
-    if (!content) {
-        alert("Prompt mẫu đang trống.");
-        return;
-    }
-
-    // Tạo file TXT
-    const blob = new Blob(
-        [content],
-        {
-            type: "text/plain;charset=utf-8"
-        }
-    );
-
-    // Tạo đường dẫn tạm thời
-    const url =
-        URL.createObjectURL(blob);
+    // Đường dẫn đến file prompt mẫu
+    const filePath = "default-prompt.txt";
 
     // Tạo thẻ tải file
-    const a =
-        document.createElement("a");
+    const link = document.createElement("a");
 
-    a.href = url;
+    link.href = filePath;
+    link.download = "default-prompt.txt";
 
-    a.download =
-        "default-prompt.txt";
+    document.body.appendChild(link);
 
-    document.body.appendChild(a);
+    link.click();
 
-    a.click();
-
-    // Dọn dẹp
-    document.body.removeChild(a);
-
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
 }
 </script>
     
