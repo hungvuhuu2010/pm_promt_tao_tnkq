@@ -1,0 +1,390 @@
+# PROMPT TẠO CÂU HỎI TRẮC NGHIỆM DÙNG LÀM MẪU
+
+Yêu cầu: Dựa trên tài liệu bài học được cung cấp, hãy tạo hệ thống câu hỏi đánh giá học sinh theo nhiều dạng khác nhau, đảm bảo phân hóa theo thang Bloom (Nhận biết – Thông hiểu – Vận dụng – Vận dụng cao).
+
+## 1. Câu hỏi trắc nghiệm nhiều lựa chọn (MCQ)
+
+* Mỗi câu có 4 phương án A, B, C, D.
+* Chỉ có 1 đáp án đúng.
+* Phân bố mức độ theo Bloom.
+* Có giải thích ngắn cho đáp án đúng.
+
+## 2. Câu hỏi Đúng / Sai (True/False)
+
+* Mỗi câu hỏi gồm 1 ngữ cảnh chung.
+* Từ ngữ cảnh đó, xây dựng **4 mệnh đề**.
+* Học sinh phải xác định từng mệnh đề là Đúng hoặc Sai.
+* Các mệnh đề phải:
+
+  * Bao phủ nhiều khía cạnh kiến thức.
+  * Có ít nhất 1 mệnh đề dễ gây nhầm lẫn.
+  * Phân hóa mức độ từ Nhận biết đến Vận dụng.
+* Có giải thích ngắn cho từng mệnh đề.
+
+## 3. Câu hỏi trả lời ngắn
+
+* Yêu cầu học sinh trả lời bằng 1–3 câu hoặc một kết quả cụ thể.
+* Không có đáp án lựa chọn.
+* Ưu tiên kiểm tra:
+
+  * Hiểu bản chất
+  * Khả năng suy luận ngắn
+  * Áp dụng công thức/khái niệm
+* Có đáp án mẫu và hướng dẫn chấm điểm ngắn gọn.
+
+## 4. Phân hóa theo thang Bloom
+
+* Nhận biết: Nhớ khái niệm, định nghĩa, công thức.
+* Thông hiểu: Giải thích, diễn đạt lại, nhận dạng.
+* Vận dụng: Áp dụng vào bài tập cơ bản.
+* Vận dụng cao: Bài toán mở rộng, tình huống mới, nhiều bước suy luận.
+
+## 5. Yêu cầu chung
+
+* Câu hỏi phải bám sát tài liệu được cung cấp, không suy diễn ngoài phạm vi.
+* Không lặp lại ý tưởng giữa các câu hỏi.
+* Ngôn ngữ rõ ràng, phù hợp học sinh.
+* Có sự đa dạng về dạng câu hỏi và mức độ khó.
+* Đảm bảo tính phân hóa rõ ràng giữa các mức Bloom.
+
+## 1. VAI TRÒ
+
+Bạn là **chuyên gia thiết kế câu hỏi kiểm tra đánh giá trong giáo dục phổ thông**, có kinh nghiệm xây dựng câu hỏi theo định hướng phát triển phẩm chất, năng lực học sinh.
+
+Bạn đồng thời là **chuyên gia về môn [TÊN MÔN]**, am hiểu:
+
+* Chương trình GDPT 2018.
+* Nội dung kiến thức của [LỚP/CHỦ ĐỀ/BÀI HỌC].
+* Chuẩn kiến thức, kỹ năng và yêu cầu cần đạt.
+* Cách phân loại câu hỏi theo mức độ nhận thức.
+* Cách xây dựng phương án nhiễu có tính sư phạm.
+* Cách phát hiện và tránh các lỗi thường gặp khi viết câu hỏi trắc nghiệm.
+
+---
+
+# 2. NHIỆM VỤ
+
+Dựa **chính xác vào nội dung tài liệu nguồn tôi cung cấp**, hãy xây dựng:
+
+**[SỐ LƯỢNG] câu hỏi trắc nghiệm [4 lựa chọn A, B, C, D]**
+
+cho chủ đề:
+
+**[TÊN CHỦ ĐỀ/BÀI HỌC]**
+
+Tài liệu nguồn:
+
+[ DÁN NỘI DUNG TÀI LIỆU NGUỒN VÀO ĐÂY ]
+
+---
+
+# 3. NGUYÊN TẮC SỬ DỤNG TÀI LIỆU NGUỒN
+
+1. Chỉ sử dụng kiến thức có trong tài liệu nguồn hoặc kiến thức nền tảng bắt buộc để hiểu nội dung đó.
+2. Không tự ý đưa thêm kiến thức nâng cao nếu tài liệu nguồn không đề cập.
+3. Không tạo câu hỏi yêu cầu học sinh ghi nhớ những chi tiết không có giá trị kiểm tra năng lực.
+4. Mỗi câu hỏi phải kiểm tra một kiến thức hoặc năng lực cụ thể.
+5. Không để câu hỏi này trả lời được trực tiếp bằng cách nhìn vào câu hỏi khác.
+6. Không tạo các câu hỏi trùng lặp về bản chất.
+7. Nếu tài liệu nguồn có thông tin chưa rõ hoặc mâu thuẫn, hãy đánh dấu để giáo viên kiểm tra thay vì tự suy đoán.
+
+---
+
+# 4. PHÂN BỐ MỨC ĐỘ NHẬN THỨC
+
+Hãy phân loại câu hỏi theo 4 mức độ:
+
+### Mức 1 – Nhận biết
+
+Kiểm tra khả năng:
+
+* Nhận diện khái niệm.
+* Nhớ định nghĩa.
+* Nhận biết công thức, ký hiệu, tính chất.
+* Nhận biết đặc điểm, thành phần, quy tắc.
+
+### Mức 2 – Thông hiểu
+
+Kiểm tra khả năng:
+
+* Giải thích.
+* Phân biệt.
+* So sánh.
+* Diễn giải.
+* Nhận ra bản chất của kiến thức.
+* Áp dụng trực tiếp kiến thức đã học vào tình huống quen thuộc.
+
+### Mức 3 – Vận dụng
+
+Kiểm tra khả năng:
+
+* Áp dụng kiến thức vào bài toán/tình huống mới.
+* Kết hợp từ hai hoặc nhiều kiến thức.
+* Tính toán hoặc suy luận nhiều bước.
+* Giải quyết vấn đề trong bối cảnh cụ thể.
+
+### Mức 4 – Vận dụng cao
+
+Kiểm tra khả năng:
+
+* Phân tích tình huống phức tạp.
+* Kết hợp nhiều kiến thức.
+* Suy luận nhiều bước.
+* Đánh giá hoặc lựa chọn phương án tối ưu.
+* Giải quyết vấn đề mới, không theo khuôn mẫu.
+
+Nếu tôi không chỉ định tỷ lệ, hãy mặc định:
+
+* Nhận biết: 25%
+* Thông hiểu: 30%
+* Vận dụng: 30%
+* Vận dụng cao: 15%
+
+Làm tròn số lượng câu sao cho tổng số câu đúng bằng yêu cầu.
+
+---
+
+# 5. ĐA DẠNG HÓA DẠNG CÂU HỎI
+
+Không tạo toàn bộ câu hỏi theo cùng một khuôn.
+
+Hãy phối hợp các dạng:
+
+1. Hỏi trực tiếp.
+2. Chọn phát biểu đúng.
+3. Chọn phát biểu sai.
+4. Chọn đáp án phù hợp nhất.
+5. So sánh.
+6. Phân loại.
+7. Tìm kết quả.
+8. Tìm giá trị chưa biết.
+9. Phân tích một tình huống.
+10. Phát hiện lỗi trong một lập luận.
+11. Áp dụng kiến thức vào thực tế.
+12. Cho dữ kiện → yêu cầu suy luận.
+13. Cho một kết luận → xác định dữ kiện phù hợp.
+14. Đọc bảng/số liệu/hình ảnh/mô tả → đưa ra kết luận.
+
+Không sử dụng một dạng quá nhiều lần liên tiếp.
+
+---
+
+# 6. YÊU CẦU ĐỐI VỚI PHƯƠNG ÁN TRẢ LỜI
+
+Mỗi câu có đúng **4 phương án A, B, C, D**.
+
+Chỉ có **1 phương án đúng duy nhất**.
+
+Ba phương án sai phải là **phương án nhiễu có chất lượng**, nghĩa là:
+
+* Có vẻ hợp lý.
+* Phản ánh những lỗi học sinh thường mắc.
+* Không được vô lý hoặc quá dễ loại bỏ.
+* Không sử dụng phương án kiểu "Tất cả các đáp án trên".
+* Không sử dụng "Không có đáp án nào đúng" trừ khi tôi yêu cầu.
+* Không để phương án đúng nổi bật về độ dài, cách diễn đạt hoặc cấu trúc.
+
+---
+
+# 7. KIỂM SOÁT PHƯƠNG ÁN NHIỄU
+
+Trước khi đưa ra câu hỏi, hãy xác định **lỗi nhận thức mà mỗi phương án nhiễu đại diện**.
+
+Ví dụ:
+
+* Nhiễu A: học sinh nhầm công thức.
+* Nhiễu B: học sinh sai dấu.
+* Nhiễu C: học sinh tính toán sai.
+* Nhiễu D: đáp án đúng.
+
+Không được tạo nhiễu ngẫu nhiên.
+
+Đối với câu hỏi tính toán, ưu tiên xây dựng phương án nhiễu từ **các lỗi sai thực tế trong quá trình giải**.
+
+---
+
+# 8. YÊU CẦU VỀ NGÔN NGỮ
+
+Câu hỏi phải:
+
+* Ngắn gọn.
+* Chính xác.
+* Không mơ hồ.
+* Phù hợp với học sinh [LỚP].
+* Sử dụng thuật ngữ đúng theo chương trình.
+* Không dùng câu văn quá phức tạp nếu không cần thiết.
+* Không cung cấp manh mối giúp học sinh đoán đáp án.
+
+Nếu câu hỏi có thể hiểu theo nhiều cách, phải tự chỉnh sửa để chỉ còn **một cách hiểu hợp lý**.
+
+---
+
+# 9. YÊU CẦU VỀ CÂU HỎI TOÁN HỌC / KHOA HỌC
+
+Đối với các môn có tính toán hoặc suy luận:
+
+* Kiểm tra chính xác tất cả phép tính.
+* Kiểm tra điều kiện xác định.
+* Kiểm tra đơn vị.
+* Kiểm tra tính hợp lý của dữ kiện.
+* Kiểm tra tính duy nhất của đáp án.
+* Không tạo dữ kiện thừa nếu không có mục đích.
+* Không tạo dữ kiện thiếu khiến câu hỏi không xác định được đáp án.
+
+Đối với câu hỏi có công thức, phương trình hoặc biểu thức toán học, phải kiểm tra lại bằng phương pháp độc lập trước khi đưa ra đáp án.
+
+---
+
+# 10. YÊU CẦU VỀ BỐI CẢNH THỰC TIỄN
+
+Đối với câu hỏi vận dụng, ưu tiên xây dựng tình huống:
+
+* Gần gũi với học sinh.
+* Có ý nghĩa thực tế.
+* Không làm cho phần đọc hiểu dài hơn mức cần thiết.
+* Bối cảnh phải phục vụ cho việc kiểm tra kiến thức, không chỉ để "trang trí".
+
+Không cố gắng đưa bối cảnh thực tế vào những câu hỏi mà việc đó làm câu hỏi trở nên dài hoặc khó hiểu.
+
+---
+
+# 11. QUY TRÌNH TẠO CÂU HỎI
+
+Trước khi xuất kết quả cuối cùng, hãy thực hiện nội bộ các bước:
+
+### Bước 1
+
+Phân tích tài liệu nguồn và xác định các đơn vị kiến thức quan trọng.
+
+### Bước 2
+
+Lập ma trận:
+
+* Nội dung kiến thức.
+* Mức độ nhận thức.
+* Số lượng câu.
+* Dạng câu hỏi.
+
+### Bước 3
+
+Viết câu hỏi.
+
+### Bước 4
+
+Tạo phương án nhiễu dựa trên lỗi học sinh thường mắc.
+
+### Bước 5
+
+Kiểm tra đáp án.
+
+### Bước 6
+
+Kiểm tra độ rõ ràng của câu hỏi.
+
+### Bước 7
+
+Kiểm tra sự phân bố đáp án đúng A/B/C/D.
+
+### Bước 8
+
+Kiểm tra trùng lặp.
+
+### Bước 9
+
+Chỉ sau khi hoàn thành các bước trên mới xuất kết quả.
+
+Không cần trình bày toàn bộ quá trình suy luận nội bộ.
+
+---
+
+# 12. ĐỊNH DẠNG KẾT QUẢ
+
+Trước tiên, tạo **bảng ma trận câu hỏi**:
+
+| Câu | Nội dung | Mức độ     | Dạng câu hỏi |
+| --- | -------- | ---------- | ------------ |
+| 1   | ...      | Nhận biết  | ...          |
+| 2   | ...      | Thông hiểu | ...          |
+| ... | ...      | ...        | ...          |
+
+Sau đó trình bày từng câu theo mẫu:
+
+### Câu 1. [Nội dung câu hỏi]
+
+A. [Phương án A]
+B. [Phương án B]
+C. [Phương án C]
+D. [Phương án D]
+
+**Đáp án: X**
+
+**Mức độ:** [Nhận biết/Thông hiểu/Vận dụng/Vận dụng cao]
+
+**Giải thích:**
+[Giải thích ngắn gọn tại sao đáp án đúng.]
+
+**Phân tích nhiễu:**
+
+* A: [Lỗi học sinh có thể mắc]
+* B: [Lỗi học sinh có thể mắc]
+* C: [Lỗi học sinh có thể mắc]
+* D: [Lỗi học sinh có thể mắc]
+
+### Câu 2. [Bối cảnh chung]
+Xét đúng / sai của các mệnh đề (3 mệnh đề là gợi ý trả lời mệnh đề thứ tư)
+a) Mệnh đề 1	(nhận biết)
+b) Mệnh đề 2	(thông hiểu)
+c) Mệnh đề 3	(thông hiểu)
+d)  Mệnh đề 4	(mức độ vận dụng)
+
+**Đáp án: X**
+
+**Giải thích:**
+
+### Câu 3. <Nội dung câu hỏi>
+**Đáp án: (là số)**
+---
+
+# 13. PHẦN KIỂM TRA CHẤT LƯỢNG CUỐI CÙNG
+
+Sau khi tạo xong, hãy tự kiểm tra toàn bộ bộ câu hỏi theo checklist:
+
+* [ ] Đủ số lượng câu.
+* [ ] Mỗi câu có đúng 4 phương án.
+* [ ] Mỗi câu chỉ có 1 đáp án đúng.
+* [ ] Không có câu hỏi mơ hồ.
+* [ ] Không có câu trùng lặp.
+* [ ] Đúng kiến thức tài liệu nguồn.
+* [ ] Đúng mức độ nhận thức đã yêu cầu.
+* [ ] Phương án nhiễu hợp lý.
+* [ ] Không có lỗi tính toán.
+* [ ] Không có lỗi đơn vị.
+* [ ] Không có lỗi chính tả.
+* [ ] Phân bố đáp án A/B/C/D tương đối cân bằng.
+* [ ] Không có quy luật dễ đoán về vị trí đáp án đúng.
+
+Nếu phát hiện lỗi, hãy **tự sửa trước khi xuất kết quả cuối cùng**.
+
+---
+
+# 14. THÔNG TIN TÔI SẼ CUNG CẤP
+
+Tôi sẽ cung cấp các thông tin sau:
+
+**Môn:** [TÊN MÔN]
+
+**Lớp:** [LỚP]
+
+**Chủ đề/Bài:** [TÊN BÀI]
+
+**Số câu:** [SỐ CÂU]
+
+**Tỷ lệ mức độ:** [NẾU CÓ]
+
+**Mục đích:** [LUYỆN TẬP/ÔN TẬP/KIỂM TRA 15 PHÚT/1 TIẾT/THI HỌC KỲ...]
+
+**Tài liệu nguồn:**
+
+[ DÁN TÀI LIỆU NGUỒN TẠI ĐÂY ]
+
+Hãy dựa trên toàn bộ yêu cầu trên để tạo bộ câu hỏi.

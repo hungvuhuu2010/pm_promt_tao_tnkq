@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Prompt Builder – Tạo phiếu bài tập</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <header class="app-header">
+
+        <div>
+            <h1>Prompt Builder</h1>
+            <p>Tạo prompt AI để xây dựng phiếu bài tập</p>
+        </div>
+
+        <div class="header-status">
+            <span id="promptStatus" class="status-badge">
+                Đang tải prompt mẫu...
+            </span>
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+    <main class="main-content">
+
+
+        <!-- =================================================
+             1. THÔNG TIN CHUNG
+        ================================================== -->
+        <section class="card">
+
+            <div class="section-title">
+                <span class="section-number">1</span>
+
+                <div>
+                    <h2>Thông tin chung</h2>
+                    <p>Thông tin cơ bản của phiếu bài tập</p>
+                </div>
+            </div>
+
+
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="subject">
+                        Môn học
+                    </label>
+
+                    <input
+                        type="text"
+                        id="subject"
+                        placeholder="Ví dụ: Toán"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="grade">
+                        Lớp
+                    </label>
+
+                    <input
+                        type="text"
+                        id="grade"
+                        placeholder="Ví dụ: 11"
+                    >
+                </div>
+
+
+                <div class="form-group full-width">
+                    <label for="topic">
+                        Chủ đề / Bài học
+                    </label>
+
+                    <input
+                        type="text"
+                        id="topic"
+                        placeholder="Ví dụ: Góc lượng giác – Giá trị lượng giác"
+                    >
+                </div>
+
+
+                <div class="form-group">
+                    <label for="studentLevel">
+                        Đối tượng học sinh
+                    </label>
+
+                    <select id="studentLevel">
+
+                        <option value="">
+                            -- Chọn --
+                        </option>
+
+                        <option value="Yếu">
+                            Yếu
+                        </option>
+
+                        <option value="Trung bình">
+                            Trung bình
+                        </option>
+
+                        <option value="Khá">
+                            Khá
+                        </option>
+
+                        <option value="Giỏi">
+                            Giỏi
+                        </option>
+
+                        <option value="Trung bình - Khá">
+                            Trung bình - Khá
+                        </option>
+
+                        <option value="Khá - Giỏi">
+                            Khá - Giỏi
+                        </option>
+
+                        <option value="Đa dạng trình độ">
+                            Đa dạng trình độ
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="purpose">
+                        Mục đích
+                    </label>
+
+                    <select id="purpose">
+
+                        <option value="Luyện tập">
+                            Luyện tập
+                        </option>
+
+                        <option value="Củng cố">
+                            Củng cố kiến thức
+                        </option>
+
+                        <option value="Vận dụng">
+                            Vận dụng
+                        </option>
+
+                        <option value="Ôn tập">
+                            Ôn tập
+                        </option>
+
+                        <option value="Kiểm tra">
+                            Kiểm tra đánh giá
+                        </option>
+
+                        <option value="Phân hóa">
+                            Phân hóa học sinh
+                        </option>
+
+                    </select>
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             2. CẤU TRÚC PHIẾU
+        ================================================== -->
+        <section class="card">
+
+            <div class="section-title">
+
+                <span class="section-number">2</span>
+
+                <div>
+                    <h2>Cấu trúc phiếu bài tập</h2>
+
+                    <p>
+                        Chọn các dạng câu hỏi cần tạo
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="question-types">
+
+
+                <!-- TRẮC NGHIỆM -->
+                <div class="question-type">
+
+                    <label class="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            id="enableMCQ"
+                            checked
+                        >
+
+                        <span class="custom-checkbox"></span>
+
+                        <strong>
+                            Trắc nghiệm 4 lựa chọn
+                        </strong>
+
+                    </label>
+
+
+                    <div
+                        class="question-options"
+                        id="mcqOptions"
+                    >
+
+                        <label>
+                            Số câu
+                            <input
+                                type="number"
+                                id="mcqCount"
+                                min="0"
+                                value="10"
+                            >
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ĐÚNG SAI -->
+                <div class="question-type">
+
+                    <label class="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            id="enableTF"
+                            checked
+                        >
+
+                        <span class="custom-checkbox"></span>
+
+                        <strong>
+                            Đúng / Sai
+                        </strong>
+
+                    </label>
+
+
+                    <div
+                        class="question-options"
+                        id="tfOptions"
+                    >
+
+                        <label>
+                            Số câu
+                            <input
+                                type="number"
+                                id="tfCount"
+                                min="0"
+                                value="2"
+                            >
+                        </label>
+
+
+                        <div class="info-box">
+
+                            <strong>
+                                Cấu trúc mặc định:
+                            </strong>
+
+                            <p>
+                                Mỗi câu gồm một ngữ cảnh chung
+                                và 4 mệnh đề a, b, c, d.
+                            </p>
+
+                            <p>
+                                Mặc định 3 mệnh đề đầu đóng vai trò
+                                gợi ý/dẫn dắt cho mệnh đề thứ tư.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TRẢ LỜI NGẮN -->
+                <div class="question-type">
+
+                    <label class="checkbox-row">
+
+                        <input
+                            type="checkbox"
+                            id="enableShort"
+                            checked
+                        >
+
+                        <span class="custom-checkbox"></span>
+
+                        <strong>
+                            Trả lời ngắn – đáp số
+                        </strong>
+
+                    </label>
+
+
+                    <div
+                        class="question-options"
+                        id="shortOptions"
+                    >
+
+                        <label>
+                            Số câu
+                            <input
+                                type="number"
+                                id="shortCount"
+                                min="0"
+                                value="3"
+                            >
+                        </label>
+
+
+                        <div class="info-box">
+
+                            Học sinh trả lời bằng số.
+                            AI phải cung cấp đáp án và lời giải.
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MỨC ĐỘ -->
+            <div class="sub-section">
+
+                <h3>Mức độ nhận thức</h3>
+
+                <div class="level-grid">
+
+                    <label class="level-item">
+
+                        <input
+                            type="checkbox"
+                            id="levelRecognize"
+                            checked
+                        >
+
+                        Nhận biết
+
+                    </label>
+
+
+                    <label class="level-item">
+
+                        <input
+                            type="checkbox"
+                            id="levelUnderstand"
+                            checked
+                        >
+
+                        Thông hiểu
+
+                    </label>
+
+
+                    <label class="level-item">
+
+                        <input
+                            type="checkbox"
+                            id="levelApply"
+                            checked
+                        >
+
+                        Vận dụng
+
+                    </label>
+
+
+                    <label class="level-item">
+
+                        <input
+                            type="checkbox"
+                            id="levelAdvanced"
+                        >
+
+                        Vận dụng cao
+
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             3. YÊU CẦU RIÊNG
+        ================================================== -->
+        <section class="card">
+
+            <div class="section-title">
+
+                <span class="section-number">3</span>
+
+                <div>
+
+                    <h2>
+                        Yêu cầu riêng của giáo viên
+                    </h2>
+
+                    <p>
+                        Có thể bỏ trống nếu không có yêu cầu đặc biệt
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <textarea
+                id="customRequirements"
+                rows="6"
+                placeholder="Ví dụ:
+
+- Phù hợp với học sinh trung bình.
+- Không sử dụng kiến thức ngoài chương trình.
+- Câu hỏi có bối cảnh thực tế.
+- Các phương án nhiễu phải hợp lý.
+- Kèm đáp án và lời giải chi tiết.
+- Không để lộ đáp án trong câu hỏi..."
+            ></textarea>
+
+        </section>
+
+
+
+        <!-- =================================================
+             4. PROMPT MẪU
+        ================================================== -->
+        <section class="card">
+
+            <div class="section-title">
+
+                <span class="section-number">4</span>
+
+                <div>
+
+                    <h2>
+                        Prompt mẫu
+                    </h2>
+
+                    <p>
+                        Prompt nền dùng để xây dựng prompt hoàn chỉnh
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="prompt-toolbar">
+
+                <label
+                    for="promptFile"
+                    class="button secondary"
+                >
+                    📂 Tải prompt riêng
+                </label>
+
+                <input
+                    type="file"
+                    id="promptFile"
+                    accept=".txt,.md"
+                    hidden
+                >
+
+
+                <button
+                    type="button"
+                    id="resetPromptBtn"
+                    class="button secondary"
+                >
+                    ↺ Khôi phục prompt mặc định
+                </button>
+
+            </div>
+
+
+            <textarea
+                id="promptTemplate"
+                rows="15"
+                placeholder="Prompt mẫu sẽ được tự động đọc từ default-prompt.txt..."
+            ></textarea>
+
+
+            <div
+                id="promptFileName"
+                class="file-info"
+            >
+                Nguồn: default-prompt.txt
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             TẠO PROMPT
+        ================================================== -->
+        <section class="action-card">
+
+            <button
+                type="button"
+                id="generatePromptBtn"
+                class="button primary large"
+            >
+                ⚙ TẠO PROMPT
+            </button>
+
+
+            <button
+                type="button"
+                id="copyPromptBtn"
+                class="button secondary large"
+            >
+                📋 COPY PROMPT
+            </button>
+
+        </section>
+
+
+
+        <!-- =================================================
+             KẾT QUẢ PROMPT
+        ================================================== -->
+        <section
+            class="card result-section"
+            id="resultSection"
+        >
+
+            <div class="section-title">
+
+                <span class="section-number">
+                    ✓
+                </span>
+
+                <div>
+
+                    <h2>
+                        Prompt hoàn chỉnh
+                    </h2>
+
+                    <p>
+                        Prompt này có thể dán trực tiếp vào ChatGPT,
+                        Gemini, Claude hoặc AI khác.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <textarea
+                id="generatedPrompt"
+                rows="20"
+                readonly
+                placeholder="Prompt hoàn chỉnh sẽ xuất hiện ở đây..."
+            ></textarea>
+
+
+            <div class="result-actions">
+
+                <button
+                    type="button"
+                    id="copyResultBtn"
+                    class="button primary"
+                >
+                    📋 Sao chép prompt
+                </button>
+
+                <button
+                    type="button"
+                    id="clearResultBtn"
+                    class="button secondary"
+                >
+                    Xóa
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             5. KHỐI NÂNG CAO
+        ================================================== -->
+        <section class="advanced-card">
+
+            <button
+                type="button"
+                id="advancedToggle"
+                class="advanced-header"
+                aria-expanded="false"
+            >
+
+                <div>
+
+                    <span class="advanced-icon">
+                        ⚡
+                    </span>
+
+                    <strong>
+                        Khối nâng cao – Kết nối AI API
+                    </strong>
+
+                    <small>
+                        Không cần sử dụng nếu chỉ muốn tạo prompt
+                    </small>
+
+                </div>
+
+
+                <span
+                    id="advancedArrow"
+                    class="advanced-arrow"
+                >
+                    ▼
+                </span>
+
+            </button>
+
+
+            <div
+                id="advancedContent"
+                class="advanced-content hidden"
+            >
+
+
+                <!-- API -->
+                <div class="advanced-section">
+
+                    <h3>
+                        🔑 Kết nối AI
+                    </h3>
+
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label for="aiProvider">
+                                Nhà cung cấp AI
+                            </label>
+
+                            <select id="aiProvider">
+
+                                <option value="openai">
+                                    OpenAI
+                                </option>
+
+                                <option value="gemini">
+                                    Google Gemini
+                                </option>
+
+                                <option value="custom">
+                                    API tùy chỉnh
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="aiModel">
+                                Model
+                            </label>
+
+                            <input
+                                type="text"
+                                id="aiModel"
+                                placeholder="Nhập model AI"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group full-width">
+
+                            <label for="apiKey">
+                                API Key
+                            </label>
+
+                            <input
+                                type="password"
+                                id="apiKey"
+                                autocomplete="off"
+                                placeholder="Nhập API Key của bạn"
+                            >
+
+                            <small class="warning-text">
+
+                                API Key chỉ nên sử dụng cá nhân.
+                                Không đưa API Key vào mã nguồn công khai
+                                trên GitHub.
+
+                            </small>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TÀI LIỆU NGUỒN -->
+                <div class="advanced-section">
+
+                    <h3>
+                        📚 Tài liệu nguồn
+                    </h3>
+
+
+                    <p class="description">
+
+                        Chỉ sử dụng phần này khi kết nối AI API.
+                        Tài liệu sẽ được gửi cho AI để phân tích
+                        khi tạo phiếu.
+
+                    </p>
+
+
+                    <div class="upload-area">
+
+                        <label
+                            for="sourceFiles"
+                            class="upload-label"
+                        >
+
+                            📂
+                            <strong>
+                                Chọn tài liệu nguồn
+                            </strong>
+
+                            <span>
+                                PDF, DOCX, TXT...
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="file"
+                            id="sourceFiles"
+                            multiple
+                            accept=".pdf,.doc,.docx,.txt,.md"
+                            hidden
+                        >
+
+                    </div>
+
+
+                    <div
+                        id="sourceFileList"
+                        class="file-list"
+                    >
+                        Chưa có tài liệu.
+                    </div>
+
+                </div>
+
+
+
+                <!-- CÁCH SỬ DỤNG TÀI LIỆU -->
+                <div class="advanced-section">
+
+                    <h3>
+                        📖 Cách AI sử dụng tài liệu
+                    </h3>
+
+
+                    <div class="radio-group">
+
+                        <label>
+
+                            <input
+                                type="radio"
+                                name="sourceMode"
+                                value="reference"
+                                checked
+                            >
+
+                            <span>
+
+                                <strong>
+                                    Tham khảo
+                                </strong>
+
+                                <small>
+                                    AI có thể sử dụng tài liệu
+                                    để xây dựng câu hỏi.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+
+                        <label>
+
+                            <input
+                                type="radio"
+                                name="sourceMode"
+                                value="strict"
+                            >
+
+                            <span>
+
+                                <strong>
+                                    Bám sát tài liệu
+                                </strong>
+
+                                <small>
+                                    Ưu tiên nội dung có trong
+                                    tài liệu nguồn.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+
+                        <label>
+
+                            <input
+                                type="radio"
+                                name="sourceMode"
+                                value="only"
+                            >
+
+                            <span>
+
+                                <strong>
+                                    Chỉ sử dụng tài liệu
+                                </strong>
+
+                                <small>
+                                    Không tự bổ sung kiến thức
+                                    ngoài tài liệu, trừ khi được yêu cầu.
+                                </small>
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- AI GENERATE -->
+                <div class="advanced-action">
+
+                    <button
+                        type="button"
+                        id="generateAIButton"
+                        class="button ai-button large"
+                    >
+                        ✨ TẠO PHIẾU BẰNG AI
+                    </button>
+
+
+                    <p>
+                        Chức năng này yêu cầu API Key hợp lệ.
+                    </p>
+
+                </div>
+
+
+
+                <!-- AI RESULT -->
+                <div
+                    id="aiResultSection"
+                    class="ai-result hidden"
+                >
+
+                    <h3>
+                        📄 Phiếu bài tập do AI tạo
+                    </h3>
+
+
+                    <div
+                        id="aiResult"
+                        class="ai-result-content"
+                    ></div>
+
+
+                    <div class="result-actions">
+
+                        <button
+                            type="button"
+                            id="copyAIResultBtn"
+                            class="button primary"
+                        >
+                            📋 Sao chép phiếu
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+    <footer class="app-footer">
+
+        <p>
+            Prompt Builder – Công cụ hỗ trợ giáo viên tạo prompt AI
+        </p>
+
+        <p>
+            Prompt mẫu:
+            <strong>default-prompt.txt</strong>
+        </p>
+
+    </footer>
+
+</div>
+
+
+<!-- =========================================================
+     TOAST
+========================================================== -->
+<div
+    id="toast"
+    class="toast"
+>
+    Đã sao chép!
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================== -->
+<script src="script.js"></script>
+
+</body>
+</html>
