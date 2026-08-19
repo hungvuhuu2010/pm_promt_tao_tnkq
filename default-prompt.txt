@@ -336,29 +336,72 @@ Trước khi trả kết quả, hãy tự kiểm tra toàn bộ phiếu:
 ============================================================
 ĐỊNH DẠNG ĐẦU RA
 ============================================================
+Trước tiên, tạo **bảng ma trận câu hỏi**:
 
-Hãy xuất kết quả theo thứ tự:
+| Câu | Nội dung | Mức độ     | Dạng câu hỏi |
+| --- | -------- | ---------- | ------------ |
+| 1   | ...      | Nhận biết  | ...          |
+| 2   | ...      | Thông hiểu | ...          |
+| ... | ...      | ...        | ...          |
 
-PHẦN I. TRẮC NGHIỆM 4 LỰA CHỌN
+Sau đó trình bày từng câu theo mẫu:
 
-...
+### Câu 1. [Nội dung câu hỏi]
 
-PHẦN II. ĐÚNG / SAI
+A. [Phương án A]
+B. [Phương án B]
+C. [Phương án C]
+D. [Phương án D]
 
-...
+**Đáp án: X**
 
-PHẦN III. TRẢ LỜI NGẮN - ĐÁP SỐ
+**Mức độ:** [Nhận biết/Thông hiểu/Vận dụng/Vận dụng cao]
 
-...
+Nếu mức độ cao hơn **NHận biết** thì có **Giải thích:**
+[Giải thích ngắn gọn tại sao đáp án đúng.]
 
-PHẦN IV. ĐÁP ÁN
+**Phân tích nhiễu:**
 
-...
+* A: [Lỗi học sinh có thể mắc]
+* B: [Lỗi học sinh có thể mắc]
+* C: [Lỗi học sinh có thể mắc]
+* D: [Lỗi học sinh có thể mắc]
 
-PHẦN V. LỜI GIẢI / HƯỚNG DẪN GIẢI
+### Câu 2. [Bối cảnh chung]
+Xét đúng / sai của các mệnh đề (3 mệnh đề là gợi ý trả lời mệnh đề thứ tư)
+a) Mệnh đề 1	(nhận biết)
+b) Mệnh đề 2	(thông hiểu)
+c) Mệnh đề 3	(thông hiểu)
+d)  Mệnh đề 4	(mức độ vận dụng)
 
-...
+**Đáp án: X**
 
-Không bỏ qua phần nào đã được yêu cầu trong ma trận.
+**Giải thích:**
 
-Không tự ý thêm dạng câu hỏi khác.
+### Câu 3. <Nội dung câu hỏi>
+**Đáp án: (là số)**
+---
+**Giải thích:**
+
+# 14. THÔNG TIN TÔI SẼ CUNG CẤP
+
+Tôi sẽ cung cấp các thông tin sau:
+
+**Môn:** [TÊN MÔN]
+
+**Lớp:** [LỚP]
+
+**Chủ đề/Bài:** [TÊN BÀI]
+
+**Số câu:** [SỐ CÂU]
+
+**Tỷ lệ mức độ:** [NẾU CÓ]
+
+**Mục đích:** [LUYỆN TẬP/ÔN TẬP/KIỂM TRA 15 PHÚT/1 TIẾT/THI HỌC KỲ...]
+
+**Tài liệu nguồn:** 
+
+[ DÁN TÀI LIỆU NGUỒN TẠI ĐÂY ]
+
+Hãy dựa trên toàn bộ yêu cầu trên để tạo bộ câu hỏi.
+
