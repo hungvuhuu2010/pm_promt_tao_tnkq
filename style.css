@@ -25,7 +25,7 @@
 
     --border: #dbe1ea;
 
-    --background: #f4f6f9;
+    --background: #f5f7fa;
     --card: #ffffff;
 
     --success: #15803d;
@@ -88,6 +88,9 @@ body {
 ========================================================= */
 
 .app-header {
+    background: var(--primary);
+
+    color: #ffffff;
 
     display:
         flex;
@@ -102,7 +105,7 @@ body {
         20px;
 
     padding:
-        24px 4px 18px;
+        22px 16px;
 
 }
 
@@ -124,10 +127,11 @@ body {
 .app-header p {
 
     color:
-        var(--text-light);
+        #ffffff;
 
     font-size:
         14px;
+    opacity: .92;
 
 }
 
@@ -264,10 +268,10 @@ body {
         flex-start;
 
     gap:
-        12px;
+        10px;
 
     margin-bottom:
-        18px;
+        15px;
 
 }
 
@@ -293,16 +297,19 @@ body {
         center;
 
     border-radius:
-        8px;
+        50%;
 
     background:
-        #eff6ff;
-
-    color:
         var(--primary);
 
+    color:
+        #ffffff;
+
+
+    font-size: 20px;
+
     font-weight:
-        700;
+        bold;
 
 }
 
@@ -436,16 +443,16 @@ select {
 textarea {
 
     min-height:
-        110px;
+        100px;
 
     padding:
-        10px 11px;
+        10px 10px;
 
     resize:
         vertical;
 
     line-height:
-        1.55;
+        1.2;
 
 }
 
@@ -916,6 +923,14 @@ textarea:focus {
 
 }
 
+.button.success {
+    background: #15803d;
+    color: #ffffff;
+}
+
+.button.success:hover {
+    background: #166534;
+}
 
 .button.secondary {
 
@@ -1032,18 +1047,16 @@ textarea:focus {
 #generatedPrompt {
 
     min-height:
-        350px;
+        100px;
 
     font-family:
-        Consolas,
-        "Courier New",
-        monospace;
+        "Arial"
 
     font-size:
         13px;
 
     line-height:
-        1.55;
+        1.2;
 
 }
 
