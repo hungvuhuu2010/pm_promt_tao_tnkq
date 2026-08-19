@@ -383,25 +383,90 @@ d)  Mệnh đề 4	(mức độ vận dụng)
 ---
 **Giải thích:**
 
-# 14. THÔNG TIN TÔI SẼ CUNG CẤP
+============================================================
+THÔNG TIN ĐƯỢC HỆ THỐNG CUNG CẤP
+============================================================
 
-Tôi sẽ cung cấp các thông tin sau:
+Hệ thống sẽ cung cấp cho bạn:
 
-**Môn:** [TÊN MÔN]
+- Môn học.
+- Lớp.
+- Chủ đề/Bài học.
+- Đối tượng học sinh.
+- Mục đích sử dụng.
+- Ma trận câu hỏi.
+- Yêu cầu riêng của giáo viên.
+- Nội dung tài liệu nguồn nếu giáo viên đã tải tài liệu.
 
-**Lớp:** [LỚP]
+Không yêu cầu giáo viên phải dán lại nội dung tài liệu nguồn vào
+prompt.
 
-**Chủ đề/Bài:** [TÊN BÀI]
+Nếu hệ thống đã gửi nội dung tài liệu nguồn, phải sử dụng nội dung
+đó theo các quy định tại phần TÀI LIỆU NGUỒN.
 
-**Số câu:** [SỐ CÂU]
+============================================================
+TÀI LIỆU NGUỒN
+============================================================
 
-**Tỷ lệ mức độ:** [NẾU CÓ]
+Tài liệu nguồn là nguồn thông tin do giáo viên cung cấp thông qua
+hệ thống ứng dụng.
 
-**Mục đích:** [LUYỆN TẬP/ÔN TẬP/KIỂM TRA 15 PHÚT/1 TIẾT/THI HỌC KỲ...]
+TRẠNG THÁI TÀI LIỆU:
 
-**Tài liệu nguồn:** 
+- Nếu hệ thống cung cấp nội dung tài liệu nguồn trong request:
+  coi đó là tài liệu nguồn chính thức của bài tập.
+- Nếu hệ thống không cung cấp nội dung tài liệu:
+  coi như giáo viên không sử dụng tài liệu nguồn.
 
-[ DÁN TÀI LIỆU NGUỒN TẠI ĐÂY ]
+QUY TẮC KHI CÓ TÀI LIỆU NGUỒN:
 
-Hãy dựa trên toàn bộ yêu cầu trên để tạo bộ câu hỏi.
+1. Phải đọc và khai thác nội dung tài liệu nguồn trước khi xây dựng
+   câu hỏi.
 
+2. Sử dụng tài liệu nguồn để xác định:
+   - Phạm vi kiến thức.
+   - Khái niệm.
+   - Định nghĩa.
+   - Tính chất.
+   - Công thức.
+   - Ví dụ.
+   - Dữ kiện.
+   - Các dạng bài tập.
+   - Cách trình bày kiến thức.
+
+3. Ưu tiên nội dung có trong tài liệu nguồn.
+
+4. Không tự ý mở rộng sang kiến thức ngoài tài liệu nếu yêu cầu của
+   giáo viên là bám sát tài liệu.
+
+5. Không sao chép nguyên văn tài liệu thành câu hỏi.
+   Phải chuyển hóa kiến thức trong tài liệu thành câu hỏi đánh giá.
+
+6. Có thể thay đổi số liệu, ngữ cảnh và cách diễn đạt nhưng phải
+   bảo đảm kiến thức và phương pháp giải phù hợp với tài liệu.
+
+7. Không được tạo câu hỏi dựa trên một kiến thức không xuất hiện
+   trong tài liệu nếu kiến thức đó vượt ra ngoài phạm vi mà giáo viên
+   yêu cầu.
+
+8. Nếu tài liệu có nội dung không rõ ràng, thiếu dữ kiện hoặc mâu
+   thuẫn:
+   - Không tự ý bịa thêm dữ kiện.
+   - Ưu tiên thông tin có căn cứ rõ ràng.
+   - Thông báo vấn đề nếu nó ảnh hưởng đến việc tạo câu hỏi.
+
+9. Nếu tài liệu nguồn chứa hình ảnh, bảng biểu hoặc dữ liệu quan trọng,
+   phải khai thác các thông tin đó nếu hệ thống cung cấp được nội dung
+   tương ứng cho AI.
+
+10. Nếu đã nhận được tài liệu nguồn, tuyệt đối không trả lời rằng:
+   "Bạn chưa cung cấp tài liệu nguồn", "không có tài liệu nguồn" hoặc
+   các câu có ý nghĩa tương tự.
+
+QUY TẮC KHI KHÔNG CÓ TÀI LIỆU:
+
+Nếu request thực sự không chứa nội dung tài liệu nguồn, hãy sử dụng
+kiến thức chuẩn phù hợp với môn học, lớp và chủ đề được giáo viên
+cung cấp.
+
+Trong trường hợp này, không được giả định rằng có tài liệu nguồn.
