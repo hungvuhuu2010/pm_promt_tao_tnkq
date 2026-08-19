@@ -1540,6 +1540,7 @@ async function handleSourceFiles(
 
 
     renderSourceFiles();
+   updateSourceWarning();
 
 
     /*
@@ -1652,7 +1653,7 @@ function renderSourceFiles() {
 
 
                     renderSourceFiles();
-
+                     updateSourceWarning();
                 }
             );
 
