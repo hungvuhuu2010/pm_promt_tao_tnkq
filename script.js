@@ -53,6 +53,7 @@ const elements = {
 
     sourceFiles: $("sourceFiles"),
     sourceFileList: $("sourceFileList"),
+    sourceWarning: $("sourceWarning"),
 
     aiProvider: $("aiProvider"),
     aiModel: $("aiModel"),
@@ -1555,31 +1556,41 @@ async function handleSourceFiles(
    27. RENDER SOURCE FILES
 ========================================================= */
 
+/* =========================================================
+   27. RENDER SOURCE FILES + WARNING
+========================================================= */
+
 function renderSourceFiles() {
 
     const container =
         elements.sourceFileList;
-
 
     if (!container) {
         return;
     }
 
 
-    if (
-        !state.sourceFiles.length
-    ) {
+    /*
+       Không có tài liệu
+    */
+
+    if (!state.sourceFiles.length) {
 
         container.textContent =
             "Chưa có tài liệu.";
 
-        return;
+        updateSourceWarning();
 
+        return;
     }
 
 
     container.innerHTML = "";
 
+
+    /*
+       Hiển thị danh sách file
+    */
 
     state.sourceFiles.forEach(
         (item, index) => {
@@ -1660,6 +1671,174 @@ function renderSourceFiles() {
 
         }
     );
+
+
+    /*
+       Cập nhật cảnh báo
+    */
+
+    updateSourceWarning();
+
+}
+/* =========================================================
+   27A. SOURCE LENGTH WARNING
+========================================================= */
+
+function updateSourceWarning() {
+
+    const warning =
+        elements.sourceWarning;
+
+
+    if (!warning) {
+        return;
+    }
+
+
+    /*
+       Tính tổng số ký tự thực sự đã
+       được trích xuất.
+    */
+
+    let totalCharacters = 0;
+
+
+    state.sourceFiles.forEach(
+        item => {
+
+            if (
+                item.text &&
+                item.text.trim()
+            ) {
+
+                totalCharacters +=
+                    item.text.length;
+
+            }
+
+        }
+    );
+
+
+    /*
+       Có file nhưng chưa đọc được text
+       (ví dụ PDF/DOCX hiện tại)
+    */
+
+    const unreadableFiles =
+        state.sourceFiles.filter(
+            item =>
+                !item.text ||
+                !item.text.trim()
+        );
+
+
+    /*
+       Không có nội dung
+    */
+
+    if (
+        totalCharacters === 0 &&
+        !state.sourceFiles.length
+    ) {
+
+        warning.className =
+            "source-warning hidden";
+
+        warning.innerHTML = "";
+
+        return;
+
+    }
+
+
+    /*
+       Định dạng số
+    */
+
+    const formatted =
+        totalCharacters.toLocaleString(
+            "vi-VN"
+        );
+
+
+    /*
+       Trạng thái bình thường
+       <= 30.000 ký tự
+    */
+
+    if (
+        totalCharacters <= 30000
+    ) {
+
+        warning.className =
+            "source-warning normal";
+
+
+        warning.innerHTML =
+            `✓ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
+            `Độ dài tài liệu hiện ở mức phù hợp.`;
+
+    }
+
+
+    /*
+       Cảnh báo
+       30.001 - 60.000
+    */
+
+    else if (
+        totalCharacters <= 60000
+    ) {
+
+        warning.className =
+            "source-warning warning";
+
+
+        warning.innerHTML =
+            `⚠ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
+            `Tài liệu khá dài và có thể làm tăng lượng dữ liệu gửi đến AI. ` +
+            `Nên chỉ giữ nội dung liên quan trực tiếp đến chủ đề.`;
+
+    }
+
+
+    /*
+       Cảnh báo mạnh
+       > 60.000
+    */
+
+    else {
+
+        warning.className =
+            "source-warning danger";
+
+
+        warning.innerHTML =
+            `⚠ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
+            `Tài liệu khá dài. Nên rút gọn và chỉ giữ phần kiến thức ` +
+            `liên quan trực tiếp đến chủ đề để tiết kiệm hạn mức API.`;
+
+    }
+
+
+    /*
+       Thông báo riêng nếu có PDF/DOCX
+       chưa được trích xuất.
+    */
+
+    if (
+        unreadableFiles.length
+    ) {
+
+        warning.innerHTML +=
+            `<br><small>ℹ ${unreadableFiles.length} file ` +
+            `chưa được trích xuất nội dung trong phiên bản hiện tại ` +
+            `(${unreadableFiles.map(
+                item => item.name
+            ).join(", ")}).</small>`;
+
+    }
 
 }
 
