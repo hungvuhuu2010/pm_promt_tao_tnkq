@@ -1997,5 +1997,26 @@ textarea:focus {
             avoid;
 
     }
+/* =========================================================
+   CẢNH BÁO TÀI LIỆU NGUỒN
+========================================================= */
+
+.source-warning {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.source-warning.normal {
+    background: #eef8f0;
+    border: 1px solid #b7dfbd;
+}
+
+.source-warning.warning {
+    background: #fff8e6;
+    border: 1px solid #f0d58a;
+}
 
 }
