@@ -334,12 +334,24 @@ function handleExcelUpload(e) {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
 
-            // Render lại từng sheet vào 4 table tương ứng
-            if (workbook.SheetNames.length >= 1) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
-            if (workbook.SheetNames.length >= 2) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[1]], 'tableSection2', 2);
-            if (workbook.SheetNames.length >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[2]], 'tableSection3', 3);
-            if (workbook.SheetNames.length >= 4) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection4', 4);
+            const numSheets = workbook.SheetNames.length;
 
+            if (numSheets === 1) {
+                // TRƯỜNG HỢP 1 SHEET: Đọc vào Phần 1, xóa dữ liệu các phần còn lại
+                parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
+                
+                // Xóa dữ liệu các bảng 2, 3, 4
+                document.querySelectorAll('#tableSection2 tbody, #tableSection3 tbody, #tableSection4 tbody')
+                        .forEach(tbody => tbody.innerHTML = '');
+            } else {
+                // TRƯỜNG HỢP NHIỀU SHEET (2 - 4 Sheet): Đọc theo từng sheet tương ứng
+                if (numSheets >= 1) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
+                if (numSheets >= 2) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[1]], 'tableSection2', 2);
+                if (numSheets >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection3', 3);
+                if (numSheets >= 4) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection4', 4);
+            }
+
+            // Cập nhật lại tổng số câu sau khi tải
             calculateMatrixTotals();
             showToast('Đã tải ma trận từ Excel thành công!');
         } catch (err) {
@@ -349,6 +361,7 @@ function handleExcelUpload(e) {
     };
     reader.readAsArrayBuffer(file);
 }
+
 
 function parseExcelSheetToTable(sheet, tableId, sectionType) {
     const table = document.getElementById(tableId);
