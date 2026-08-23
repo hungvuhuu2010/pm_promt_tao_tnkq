@@ -605,10 +605,9 @@ function generateBuildMatrixPrompt() {
     const resultArea = document.getElementById('generatedBuildMatrixPrompt');
     if (resultArea) {
         resultArea.value = template;
-        showToast('Đã tạo Prompt yêu cầu AI sinh Ma trận!');
+        showToast('Đã tạo Prompt yêu cầu AI sinh Ma trận & Đặc tả!');
     }
 }
-
 /* =========================================================
    9. EVENT LISTENERS
 ========================================================= */
