@@ -1,0 +1,28 @@
+# VAI TRÒ VÀ NHIỆM VỤ
+
+Bạn là một chuyên gia thiết kế ma trận đặc tả đề kiểm tra môn học.
+Tôi đính kèm theo đây một **file Excel ma trận mẫu** (chứa cấu trúc các bảng/sheet ma trận chuẩn).
+
+Nhiệm vụ của bạn là: Đọc cấu trúc file ma trận mẫu được đính kèm, giữ nguyên định dạng các cột/hàng/sheet của file đó, sau đó **thay đổi và điền lại toàn bộ nội dung** (số lượng câu, đơn vị kiến thức, mức độ NB/TH/VD, mô tả yêu cầu) dựa trên thông tin bài kiểm tra dưới đây.
+
+---
+
+# I. THÔNG TIN BÀI KIỂM TRA
+
+* **Môn học:** {MON_HOC}
+* **Lớp:** {LOP}
+* **Thời gian làm bài:** {THOI_GIAN}
+* **Cấu trúc & Dạng câu hỏi ưu tiên:** {CAU_TRUC}
+
+---
+
+# II. CÁC CHỦ ĐỀ VÀ BỐ CỤC ĐIỂM YÊU CẦU
+
+{DANH_SACH_CHU_DE}
+
+---
+
+# III. YÊU CẦU ĐẦU RA
+
+1. Dựa trên tỷ lệ điểm/bố cục đã cho, tự động chọn dạng câu hỏi và phân bổ số lượng câu, mức độ nhận thức (NB, TH, VD) sao cho hợp lý.
+2. Xuất lại kết quả ma trận và đặc tả **đúng theo cấu trúc các bảng/sheet trong file Excel mẫu đính kèm** dưới dạng Bảng Text / Markdown (hoặc chỉnh sửa trực tiếp dữ liệu file nếu hỗ trợ) để tôi có thể dán/lưu lại vào file Excel mẫu.

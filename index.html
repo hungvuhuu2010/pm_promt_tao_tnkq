@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ứng dụng tạo prompt AI để xây dựng phiếu bài tập">
+    <title>AI Prompt Builder - Phiếu bài tập</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Thêm thư viện XLSX để hỗ trợ đọc/xuất file ma trận Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <header class="app-header">
+        <div>
+            <h1>Tạo prompt xây dựng phiếu bài tập trắc nghiệm</h1>
+        </div>
+        <div class="header-status">
+            <span id="promptStatus" class="status-badge">Đang khởi động...</span>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         NAVIGATION TABS
+    ====================================================== -->
+    <nav class="app-tabs">
+        <button type="button" class="tab-btn active" id="tabNoMatrixBtn" onclick="switchTab('no-matrix')">
+            📋 TẠO PHIẾU BÀI TẬP KHÔNG THEO MA TRẬN
+        </button>
+        <button type="button" class="tab-btn" id="tabWithMatrixBtn" onclick="switchTab('with-matrix')">
+            📊 TẠO PHIẾU BÀI TẬP THEO MA TRẬN
+        </button>
+	<button type="button" class="tab-btn" id="tabGenerateMatrixBtn" onclick="switchTab('generate-matrix')">
+        📐 TẠO MA TRẬN ĐẶC TẢ
+    	</button>
+
+    </nav>
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+    <main class="main-content">
+
+        <!-- =================================================================
+             TAB 1: TẠO PHIẾU BÀI TẬP KHÔNG THEO MA TRẬN (GIAO DIỆN CŨ)
+        ================================================================== -->
+        <div id="tabNoMatrix" class="tab-content active">
+
+            <!-- 1. THÔNG TIN BÀI TẬP -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">1</div>
+                    <div>
+                        <h2>Thông tin bài tập</h2>
+                        <p>Nhập những thông tin cơ bản của phiếu bài tập</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="subject">Môn học</label>
+                        <input type="text" id="subject" placeholder="Ví dụ: Toán">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="grade">Lớp</label>
+                        <input type="text" id="grade" placeholder="Ví dụ: 11">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="topic">Chủ đề / Bài học</label>
+                        <input type="text" id="topic" placeholder="Ví dụ: Góc lượng giác - Giá trị lượng giác">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="studentLevel">Đối tượng học sinh</label>
+                        <select id="studentLevel">
+                            <option value="">-- Không chỉ định --</option>
+                            <option value="Học sinh yếu">Học sinh yếu</option>
+                            <option value="Học sinh trung bình">Học sinh trung bình</option>
+                            <option value="Học sinh khá">Học sinh khá</option>
+                            <option value="Học sinh giỏi">Học sinh giỏi</option>
+                            <option value="Lớp có trình độ không đồng đều">Lớp có trình độ không đồng đều</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purpose">Mục đích sử dụng</label>
+                        <select id="purpose">
+                            <option value="Luyện tập">Luyện tập</option>
+                            <option value="Ôn tập">Ôn tập</option>
+                            <option value="Củng cố kiến thức">Củng cố kiến thức</option>
+                            <option value="Kiểm tra thường xuyên">Kiểm tra thường xuyên</option>
+                            <option value="Chuẩn bị kiểm tra">Chuẩn bị kiểm tra</option>
+                            <option value="Phân hóa học sinh">Phân hóa học sinh</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. MA TRẬN CÂU HỎI -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">2</div>
+                    <div>
+                        <h2>Ma trận câu hỏi</h2>
+                        <p>Nhập trực tiếp số câu ở từng mức độ nhận thức</p>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <strong>NB</strong> = Nhận biết&nbsp;&nbsp;&nbsp;
+                    <strong>TH</strong> = Thông hiểu&nbsp;&nbsp;&nbsp;
+                    <strong>VD</strong> = Vận dụng&nbsp;&nbsp;&nbsp;
+                    <strong>VDC</strong> = Vận dụng cao
+                </div>
+
+                <div class="question-matrix-wrapper">
+                    <table class="question-matrix" id="questionMatrix">
+                        <thead>
+                            <tr>
+                                <th class="type-column">Dạng câu hỏi</th>
+                                <th>NB</th>
+                                <th>TH</th>
+                                <th>VD</th>
+                                <th>VDC</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <label class="matrix-type">
+                                        <input type="checkbox" id="enableMCQ" checked>
+                                        <span class="matrix-checkbox"></span>
+                                        <span>
+                                            <strong>Trắc nghiệm</strong>
+                                            <small>4 lựa chọn A, B, C, D</small>
+                                        </span>
+                                    </label>
+                                </td>
+                                <td><input type="number" id="mcqNB" class="matrix-input" min="0" value="2"></td>
+                                <td><input type="number" id="mcqTH" class="matrix-input" min="0" value="2"></td>
+                                <td><input type="number" id="mcqVD" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="mcqVDC" class="matrix-input" min="0" value="0"></td>
+                                <td><strong id="mcqTotal" class="matrix-total">5</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label class="matrix-type">
+                                        <input type="checkbox" id="enableTF" checked>
+                                        <span class="matrix-checkbox"></span>
+                                        <span>
+                                            <strong>Đúng / Sai</strong>
+                                            <small>1 ngữ cảnh + 4 mệnh đề</small>
+                                        </span>
+                                    </label>
+                                </td>
+                                <td><input type="number" id="tfNB" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="tfTH" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="tfVD" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="tfVDC" class="matrix-input" min="0" value="0"></td>
+                                <td><strong id="tfTotal" class="matrix-total">3</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <label class="matrix-type">
+                                        <input type="checkbox" id="enableShort" checked>
+                                        <span class="matrix-checkbox"></span>
+                                        <span>
+                                            <strong>Trả lời ngắn</strong>
+                                            <small>Đáp án là số</small>
+                                        </span>
+                                    </label>
+                                </td>
+                                <td><input type="number" id="shortNB" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="shortTH" class="matrix-input" min="0" value="1"></td>
+                                <td><input type="number" id="shortVD" class="matrix-input" min="0" value="0"></td>
+                                <td><input type="number" id="shortVDC" class="matrix-input" min="0" value="0"></td>
+                                <td><strong id="shortTotal" class="matrix-total">2</strong></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>TỔNG</th>
+                                <th id="grandNB">4</th>
+                                <th id="grandTH">4</th>
+                                <th id="grandVD">2</th>
+                                <th id="grandVDC">0</th>
+                                <th id="grandTotal">10</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="matrix-note">
+                    <strong>Quy tắc câu Đúng/Sai:</strong>
+                    Mỗi câu gồm một ngữ cảnh chung và 4 mệnh đề a, b, c, d. Mặc định 3 mệnh đề đầu có vai trò gợi ý/dẫn dắt cho mệnh đề thứ tư, nhưng không được làm lộ trực tiếp đáp án của mệnh đề d.
+                </div>
+            </section>
+
+            <!-- 3. PROMPT MẪU -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">3</div>
+                    <div>
+                        <h2>Prompt mẫu</h2>
+                        <p>Tự động đọc từ default-prompt.txt hoặc tải prompt riêng</p>
+                    </div>
+                </div>
+
+                <div class="prompt-toolbar">
+                    <label class="button primary" for="promptFile">📂 Tải prompt riêng</label>
+                    <input type="file" id="promptFile" accept=".txt,.md" hidden>
+
+                    <button type="button" class="button error" id="resetPromptBtn">↺ Dùng Prompt mặc định</button>
+                    <button type="button" id="downloadDefaultPromptBtn" class="button error" onclick="downloadDefaultPrompt()">⬇ Tải prompt mẫu</button>
+                </div>
+
+                <textarea id="promptTemplate" class="prompt-template" rows="5" spellcheck="false" placeholder="Đang tải prompt mẫu..."></textarea>
+                
+                <div id="promptFileName" class="file-info">Nguồn: đang tải...</div>
+            </section>
+
+            <!-- ACTION -->
+            <section class="action-card">
+                <button type="button" class="button primary large" id="generatePromptBtn">⚙ TẠO PROMPT</button>
+            </section>
+
+            <!-- KẾT QUẢ PROMPT -->
+            <section class="card result-section" id="resultSection">
+                <div class="section-title">
+                    <div class="section-number">4</div>
+                    <div>
+                        <h2>Prompt hoàn chỉnh</h2>
+                        <p>Copy prompt này và dán vào ChatGPT hoặc AI khác</p>
+                    </div>
+                </div>
+
+                <div class="prompt-toolbar">
+                    <button type="button" class="button success" id="copyPromptBtn">Sao chép prompt</button>
+                    <button type="button" class="button error" id="clearResultBtn">Xóa</button>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="generatedPrompt" rows="5" readonly placeholder="Prompt hoàn chỉnh sẽ xuất hiện ở đây..."></textarea>
+                </div>
+            </section>
+
+            <!-- NÂNG CAO -->
+            <section class="advanced-card">
+                <button type="button" class="advanced-header" id="advancedToggle" aria-expanded="false">
+                    <div>
+                        <span class="advanced-icon">⚙</span>
+                        <strong>NÂNG CAO – Tài liệu nguồn & tạo phiếu bằng AI</strong>
+                    </div>
+                    <span class="advanced-arrow">▼</span>
+                </button>
+
+                <div id="advancedContent" class="advanced-content hidden">
+                    <div class="advanced-section">
+                        <h3>1. Tài liệu nguồn</h3>
+                        <p class="description">Tài liệu nguồn chỉ được đưa vào prompt khi sử dụng chức năng AI API. Ở chế độ tạo prompt thông thường, tài liệu không được chèn vào, giúp prompt ngắn gọn.</p>
+
+                        <div class="upload-area">
+                            <label class="upload-label" for="sourceFiles">
+                                <strong>📎 Tải tài liệu nguồn</strong>
+                                <span>TXT, MD, PDF, DOCX...</span>
+                            </label>
+                            <input type="file" id="sourceFiles" multiple accept=".txt,.md,.pdf,.doc,.docx" hidden>
+                        </div>
+
+                        <div id="sourceWarning" class="source-warning normal">Chưa có tài liệu nguồn.</div>
+                        <div id="sourceFileList" class="file-list">Chưa có tài liệu.</div>
+
+                        <div class="sub-section">
+                            <h3>Cách sử dụng tài liệu</h3>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="sourceMode" value="reference" checked>
+                                    <span>
+                                        <strong>Tham khảo</strong>
+                                        <small>AI dùng tài liệu để hiểu nội dung và phạm vi kiến thức.</small>
+                                    </span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="sourceMode" value="strict">
+                                    <span>
+                                        <strong>Bám sát tài liệu</strong>
+                                        <small>Ưu tiên nội dung trong tài liệu, hạn chế mở rộng.</small>
+                                    </span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="sourceMode" value="only">
+                                    <span>
+                                        <strong>Chỉ sử dụng tài liệu</strong>
+                                        <small>Không sử dụng kiến thức bên ngoài nếu tài liệu không cung cấp.</small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="advanced-section">
+                        <h3>2. Kết nối AI bằng API Key</h3>
+                        <p class="description">Dành cho giáo viên hiểu biết kỹ thuật và muốn tạo phiếu trực tiếp từ ứng dụng.</p>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="aiProvider">AI Provider</label>
+                                <select id="aiProvider">
+                                    <option value="openai">OpenAI</option>
+                                    <option value="gemini">Google Gemini</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="aiModel">Model</label>
+                                <input type="text" id="aiModel" value="gpt-5" placeholder="Tên model AI">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="apiKey">API Key</label>
+                                <input type="password" id="apiKey" autocomplete="off" placeholder="Nhập API Key của bạn...">
+                            </div>
+                        </div>
+
+                        <div class="advanced-action">
+                            <button type="button" class="button ai-button large" id="generateAIButton">✨ TẠO PHIẾU BẰNG AI</button>
+                            <p>Ứng dụng sẽ tạo prompt, bổ sung tài liệu nguồn và gửi yêu cầu tới AI.</p>
+                        </div>
+
+                        <div id="aiResultSection" class="ai-result hidden">
+                            <h3>Phiếu bài tập do AI tạo</h3>
+                            <div id="aiResult" class="ai-result-content"></div>
+                            <div class="result-actions">
+                                <button type="button" class="button primary" id="copyAIResultBtn">📋 Sao chép phiếu</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- =================================================================
+             TAB 2: TẠO PHIẾU BÀI TẬP THEO MA TRẬN (MỚI)
+        ================================================================== -->
+        <div id="tabWithMatrix" class="tab-content">
+
+            <!-- 1. THÔNG TIN BÀI TẬP & NHẬP MA TRẬN TỪ EXCEL -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">1</div>
+                    <div>
+                        <h2>Thông tin chung & Tải Ma trận từ Excel</h2>
+                        <p>Tải file Excel mẫu hoặc nhập trực tiếp thông tin chi tiết các phần bên dưới</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="matrixSubject">Môn học</label>
+                        <input type="text" id="matrixSubject" placeholder="Ví dụ: Toán">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="matrixGrade">Lớp</label>
+                        <input type="text" id="matrixGrade" placeholder="Ví dụ: 11">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="matrixTopic">Chủ đề / Bài học</label>
+                        <input type="text" id="matrixTopic" placeholder="Ví dụ: Ôn tập Học kỳ II">
+                    </div>
+                </div>
+
+                <div class="excel-upload-box">
+                    <label for="excelMatrixFile" class="button primary">📂 Tải Ma trận từ file Excel (.xlsx)</label>
+                    <input type="file" id="excelMatrixFile" accept=".xlsx, .xls" hidden>
+
+<!-- Nút tải file mẫu mới bổ sung -->
+    <button type="button" class="button error" id="downloadTemplateMatrixBtn" onclick="downloadTemplateMatrix()">
+        ⬇ Tải file ma trận mẫu (.xlsx)
+    </button>
+
+                    <span id="excelFileName" class="file-info-text">Chưa chọn file (Tham khảo cấu trúc file <code>mau_ma_tran.xlsx</code>)</span>
+
+
+
+                </div>
+            </section>
+
+            <!-- 2. MA TRẬN CHI TIẾT 4 PHẦN (COLLAPSIBLE SECTIONS) -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">2</div>
+                    <div>
+                        <h2>Chi tiết Ma trận các phần câu hỏi</h2>
+                        <p>Nhập thông tin câu hỏi thủ công hoặc chỉnh sửa dữ liệu từ file Excel đã tải</p>
+                    </div>
+                </div>
+
+                <!-- SECTION 1: TNKQ 4 PHƯƠNG ÁN -->
+                <div class="accordion-item open">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><strong>PHẦN 1: Câu hỏi TNKQ 4 phương án</strong></span>
+                        <span class="accordion-arrow">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="matrix-table-wrapper">
+                            <table class="detail-matrix-table" id="tableSection1">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th style="width: 200px;">Đơn vị kiến thức</th>
+                                        <th style="width: 60px;">NB</th>
+                                        <th style="width: 60px;">TH</th>
+                                        <th style="width: 60px;">VD</th>
+                                        <th>Mức độ kiến thức / kỹ năng cần kiểm tra, đánh giá</th>
+                                        <th style="width: 50px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" class="cell-stt" value="1"></td>
+                                        <td><input type="text" class="cell-topic" value="Hàm số mũ, logarit"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-nb" checked onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-th" onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+                                        <td><input type="text" class="cell-desc" value="Tìm tập xác định của hàm số"></td>
+                                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="button secondary btn-add-row" onclick="addMatrixRow('tableSection1', 1)">+ Thêm câu hỏi Phần 1</button>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: CÂU HỎI ĐÚNG SAI 4 MỆNH ĐỀ -->
+                <div class="accordion-item open">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><strong>PHẦN 2: Câu hỏi xét Đúng / Sai (4 mệnh đề)</strong></span>
+                        <span class="accordion-arrow">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="matrix-table-wrapper">
+                            <table class="detail-matrix-table" id="tableSection2">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 50px;">STT</th>
+                                        <th style="width: 50px;">Ý</th>
+                                        <th style="width: 180px;">Bối cảnh / Đơn vị kiến thức</th>
+                                        <th style="width: 50px;">NB</th>
+                                        <th style="width: 50px;">TH</th>
+                                        <th style="width: 50px;">VD</th>
+                                        <th>Mức độ kiến thức / kỹ năng cần kiểm tra, đánh giá</th>
+                                        <th style="width: 50px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" class="cell-stt" value="1"></td>
+                                        <td><input type="text" class="cell-sub" value="a"></td>
+                                        <td><input type="text" class="cell-topic" value="Quy tắc tính xác suất"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-nb" checked onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-th" onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+                                        <td><input type="text" class="cell-desc" value="Đếm số phần tử của không gian mẫu"></td>
+                                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="button secondary btn-add-row" onclick="addMatrixRow('tableSection2', 2)">+ Thêm mệnh đề/câu hỏi Phần 2</button>
+                    </div>
+                </div>
+
+                <!-- SECTION 3: CÂU HỎI TRẢ LỜI NGẮN -->
+                <div class="accordion-item open">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><strong>PHẦN 3: Câu hỏi Trả lời ngắn</strong></span>
+                        <span class="accordion-arrow">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="matrix-table-wrapper">
+                            <table class="detail-matrix-table" id="tableSection3">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th style="width: 200px;">Đơn vị kiến thức</th>
+                                        <th style="width: 60px;">NB</th>
+                                        <th style="width: 60px;">TH</th>
+                                        <th style="width: 60px;">VD</th>
+                                        <th>Mức độ kiến thức / kỹ năng cần kiểm tra, đánh giá</th>
+                                        <th style="width: 50px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" class="cell-stt" value="1"></td>
+                                        <td><input type="text" class="cell-topic" value="Lôgarit"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-nb" onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-th" checked onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+                                        <td><input type="text" class="cell-desc" value="Tính giá trị của biểu thức logarit"></td>
+                                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="button secondary btn-add-row" onclick="addMatrixRow('tableSection3', 3)">+ Thêm câu hỏi Phần 3</button>
+                    </div>
+                </div>
+
+                <!-- SECTION 4: TỰ LUẬN / KHÁC -->
+                <div class="accordion-item open">
+                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                        <span><strong>PHẦN 4: Câu hỏi Tự luận / Dạng khác</strong></span>
+                        <span class="accordion-arrow">▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="matrix-table-wrapper">
+                            <table class="detail-matrix-table" id="tableSection4">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60px;">STT</th>
+                                        <th style="width: 200px;">Đơn vị kiến thức</th>
+                                        <th style="width: 60px;">NB</th>
+                                        <th style="width: 60px;">TH</th>
+                                        <th style="width: 60px;">VD</th>
+                                        <th>Mức độ kiến thức / kỹ năng cần kiểm tra, đánh giá</th>
+                                        <th style="width: 50px;">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><input type="text" class="cell-stt" value="1"></td>
+                                        <td><input type="text" class="cell-topic" value="Phương trình mũ"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-nb" onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-th" checked onclick="calculateMatrixTotals()"></td>
+                                        <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+                                        <td><input type="text" class="cell-desc" value="Giải phương trình mũ cơ bản"></td>
+                                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button type="button" class="button secondary btn-add-row" onclick="addMatrixRow('tableSection4', 4)">+ Thêm câu hỏi Phần 4</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. BẢNG TỔNG HỢP VÀ XUẤT FILE -->
+            <section class="card">
+                <div class="section-title">
+                    <div class="section-number">3</div>
+                    <div>
+                        <h2>Tổng hợp Ma trận & Xuất dữ liệu</h2>
+                        <p>Ứng dụng tự động tính toán tổng số câu theo từng phần và từng mức độ</p>
+                    </div>
+                </div>
+
+                <div class="question-matrix-wrapper">
+                    <table class="question-matrix">
+                        <thead>
+                            <tr>
+                                <th>Dạng / Phần</th>
+                                <th>NB</th>
+                                <th>TH</th>
+                                <th>VD</th>
+                                <th>Tổng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Phần 1: TNKQ 4 phương án</td>
+                                <td id="sec1NB">0</td>
+                                <td id="sec1TH">0</td>
+                                <td id="sec1VD">0</td>
+                                <td id="sec1Total">0</td>
+                            </tr>
+                            <tr>
+                                <td>Phần 2: Đúng / Sai (Số mệnh đề)</td>
+                                <td id="sec2NB">0</td>
+                                <td id="sec2TH">0</td>
+                                <td id="sec2VD">0</td>
+                                <td id="sec2Total">0</td>
+                            </tr>
+                            <tr>
+                                <td>Phần 3: Trả lời ngắn</td>
+                                <td id="sec3NB">0</td>
+                                <td id="sec3TH">0</td>
+                                <td id="sec3VD">0</td>
+                                <td id="sec3Total">0</td>
+                            </tr>
+                            <tr>
+                                <td>Phần 4: Tự luận / Khác</td>
+                                <td id="sec4NB">0</td>
+                                <td id="sec4TH">0</td>
+                                <td id="sec4VD">0</td>
+                                <td id="sec4Total">0</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>TỔNG CỘNG</th>
+                                <th id="matrixGrandNB">0</th>
+                                <th id="matrixGrandTH">0</th>
+                                <th id="matrixGrandVD">0</th>
+                                <th id="matrixGrandTotal">0</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="matrix-action-toolbar">
+                    <button type="button" class="button secondary" id="exportMatrixExcelBtn">💾 Tải về file Ma trận (.xlsx)</button>
+                </div>
+            </section>
+
+            <!-- ACTION TẠO PROMPT THEO MA TRẬN -->
+            <section class="action-card">
+                <button type="button" class="button primary large" id="generateMatrixPromptBtn">⚙ TẠO PROMPT THEO MA TRẬN</button>
+            </section>
+
+            <!-- KẾT QUẢ PROMPT THEO MA TRẬN -->
+            <section class="card result-section" id="matrixResultSection">
+                <div class="section-title">
+                    <div class="section-number">4</div>
+                    <div>
+                        <h2>Prompt hoàn chỉnh theo Ma trận</h2>
+                        <p>Copy prompt này và dán vào ChatGPT hoặc AI khác</p>
+                    </div>
+                </div>
+
+                <div class="prompt-toolbar">
+                    <button type="button" class="button success" id="copyMatrixPromptBtn">Sao chép prompt</button>
+                    <button type="button" class="button error" id="clearMatrixResultBtn">Xóa</button>
+                </div>
+
+                <div class="form-group">
+                    <textarea id="generatedMatrixPrompt" rows="8" readonly placeholder="Prompt theo ma trận chi tiết sẽ xuất hiện ở đây..."></textarea>
+                </div>
+            </section>
+
+        </div>
+
+
+<!-- =================================================================
+     TAB 3: TẠO MA TRẬN ĐẶC TẢ (MỚI)
+================================================================== -->
+<div id="tabGenerateMatrix" class="tab-content">
+
+    <!-- 1. THÔNG TIN CHUNG BÀI KIỂM TRA -->
+    <section class="card">
+        <div class="section-title">
+            <div class="section-number">1</div>
+            <div>
+                <h2>Thông tin bài kiểm tra & Yêu cầu tổng quan</h2>
+                <p>Nhập thông tin cơ bản và hình thức đánh giá để AI định hình ma trận</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="genMatrixSubject">Môn học</label>
+                <input type="text" id="genMatrixSubject" placeholder="Ví dụ: Toán">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixGrade">Lớp</label>
+                <input type="text" id="genMatrixGrade" placeholder="Ví dụ: 11">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixTime">Thời gian làm bài (Phút)</label>
+                <input type="text" id="genMatrixTime" placeholder="Ví dụ: 90 phút">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixFormat">Cấu trúc đề kiểm tra</label>
+                <select id="genMatrixFormat">
+                    <option value="Kết hợp 4 phần (TN 4 lựa chọn + Đúng/Sai + Trả lời ngắn + Tự luận)">Kết hợp 4 phần chuẩn Bộ GD&ĐT (TN 4 lựa chọn, Đúng/Sai, Trả lời ngắn, Tự luận)</option>
+                    <option value="Trắc nghiệm 100% (4 lựa chọn)">100% Trắc nghiệm 4 lựa chọn</option>
+                    <option value="Trắc nghiệm kết hợp Tự luận">Trắc nghiệm 4 lựa chọn + Tự luận</option>
+                    <option value="Tự do (AI tự đề xuất phân bổ phù hợp)">Tự do (AI tự chọn dạng câu hỏi phù hợp nhất)</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. BỐ CỤC ĐIỂM / TỶ LỆ CÁC CHỦ ĐỀ -->
+    <section class="card">
+        <div class="section-title">
+            <div class="section-number">2</div>
+            <div>
+                <h2>Phân bổ Chủ đề / Đơn vị kiến thức & Bố cục điểm</h2>
+                <p>Nhập danh sách các chủ đề và tỷ lệ % điểm (hoặc số điểm) tương ứng</p>
+            </div>
+        </div>
+
+        <div class="matrix-table-wrapper">
+            <table class="detail-matrix-table" id="topicWeightTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">STT</th>
+                        <th>Tên Chủ đề / Chương / Đơn vị kiến thức</th>
+                        <th style="width: 150px;">Bố cục điểm / Tỷ lệ (%)</th>
+                        <th style="width: 250px;">Ghi chú / Trọng tâm cần khai thác</th>
+                        <th style="width: 50px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="1"></td>
+                        <td><input type="text" class="cell-topic-name" value="Hàm số mũ và Hàm số lôgarit"></td>
+                        <td><input type="text" class="cell-topic-weight" value="40% (4.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Tập xác định, đồ thị, phương trình mũ"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="2"></td>
+                        <td><input type="text" class="cell-topic-name" value="Hình học không gian & Thể tích"></td>
+                        <td><input type="text" class="cell-topic-weight" value="30% (3.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Quan hệ vuông góc, khoảng cách, thể tích khối chóp"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="3"></td>
+                        <td><input type="text" class="cell-topic-name" value="Xác suất cổ điển"></td>
+                        <td><input type="text" class="cell-topic-weight" value="30% (3.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Quy tắc cộng, nhân xác suất, biến cố độc lập"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="button secondary btn-add-row" onclick="addTopicRow()">+ Thêm Chủ đề</button>
+    </section>
+
+    <!-- ACTION -->
+    <section class="action-card">
+        <button type="button" class="button primary large" id="generateBuildMatrixPromptBtn">⚙ TẠO PROMPT SINH MA TRẬN</button>
+    </section>
+
+    <!-- KẾT QUẢ PROMPT TẠO MA TRẬN -->
+<section class="card result-section" id="genMatrixResultSection">
+    <div class="section-title">
+        <div class="section-number">3</div>
+        <div>
+            <h2>Prompt yêu cầu AI điền vào Ma trận mẫu</h2>
+            <p>Copy prompt này, <strong>đính kèm file Excel ma trận mẫu (ví dụ: mau_ma_tran.xlsx hoặc mau_ma_tran_2.xlsx)</strong> và gửi cho ChatGPT / Gemini / Claude.</p>
+        </div>
+    </div>
+
+    <div class="prompt-toolbar">
+        <button type="button" class="button success" id="copyGenMatrixPromptBtn">Sao chép prompt</button>
+        <button type="button" class="button error" id="clearGenMatrixResultBtn">Xóa</button>
+        <button type="button" class="button secondary" onclick="downloadTemplateMatrix()">⬇ Tải file ma trận mẫu (.xlsx)</button>
+    </div>
+
+    <div class="form-group">
+        <textarea id="generatedBuildMatrixPrompt" rows="8" readonly placeholder="Prompt tạo ma trận sẽ xuất hiện ở đây..."></textarea>
+    </div>
+</section>
+
+
+</div>
+
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+        <p>AI Prompt Builder</p>
+        <p>Công cụ hỗ trợ giáo viên xây dựng prompt phiếu bài tập</p>
+    </footer>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- SCRIPT -->
+<script src="script.js"></script>
+
+<script>
+function downloadDefaultPrompt() {
+    const filePath = "default-prompt.txt";
+    const link = document.createElement("a");
+    link.href = filePath;
+    link.download = "default-prompt.txt";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+
+</body>
+</html>
