@@ -1,7 +1,9 @@
 # VAI TRÒ VÀ NHIỆM VỤ
 
-Bạn là một chuyên gia thiết kế ma trận đặc tả đề kiểm tra và đánh giá môn học chất lượng cao.
-Nhiệm vụ của bạn là xây dựng **MA TRẬN TỔNG HỢP VÀ BẢNG ĐẶC TẢ ĐỀ KIỂM TRA CHI TIẾT** dựa trên thông tin bài kiểm tra và danh sách phân bổ chủ đề do giáo viên cung cấp dưới đây.
+Bạn là một chuyên gia thiết kế ma trận đặc tả đề kiểm tra môn học.
+Tôi đính kèm theo đây một **file Excel ma trận mẫu** (chứa cấu trúc các bảng/sheet ma trận chuẩn).
+
+Nhiệm vụ của bạn là: Đọc cấu trúc file ma trận mẫu được đính kèm, giữ nguyên định dạng các cột/hàng/sheet của file đó, sau đó **thay đổi và điền lại toàn bộ nội dung** (số lượng câu, đơn vị kiến thức, mức độ NB/TH/VD, mô tả yêu cầu) dựa trên thông tin bài kiểm tra dưới đây.
 
 ---
 
@@ -20,35 +22,7 @@ Nhiệm vụ của bạn là xây dựng **MA TRẬN TỔNG HỢP VÀ BẢNG Đ�
 
 ---
 
-# III. NGUYÊN TẮC THIẾT KẾ MA TRẬN & ĐẶC TẢ TỰ ĐỘNG
+# III. YÊU CẦU ĐẦU RA
 
-1. **Phân bổ số câu & Điểm số:** Dựa trên tỷ lệ % điểm yêu cầu, tự động chọn dạng câu hỏi (TN 4 phương án, Đúng/Sai 4 mệnh đề, Trả lời ngắn, Tự luận) và phân bổ số lượng câu cho từng chủ đề sao cho hợp lý, đúng chuẩn điểm số.
-2. **Cấu trúc 2 Bảng bắt buộc:**
-   - **BẢNG 1: MA TRẬN ĐỀ KIỂM TRA** (Thống kê tổng hợp số lượng câu/ý theo từng Chủ đề, Dạng câu hỏi và Mức độ NB/TH/VD, kèm Tổng số câu, Điểm số và Tỷ lệ %).
-   - **BẢNG 2: BẢNG ĐẶC TẢ ĐỀ KIỂM TRA** (Mô tả chi tiết Mức độ kiến thức / kỹ năng cần kiểm tra cho từng câu/ý theo các mức độ NB, TH, VD).
-
----
-
-# IV. ĐỊNH DẠNG ĐẦU RA YÊU CẦU
-
-Hãy xuất kết quả trình bày rõ ràng dưới dạng Markdown Table theo đúng cấu trúc mẫu sau:
-
-## BẢNG 1: MA TRẬN ĐỀ KIỂM TRA
-
-| STT | Chủ đề / Mạch kiến thức | Trắc nghiệm 4 lựa chọn (Số câu) | Trắc nghiệm Đúng/Sai (Số ý) | Trắc nghiệm Trả lời ngắn (Số câu) | Tự luận (Số câu) | Tổng số câu/ý | Điểm số | Tỷ lệ % |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| | | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | | | |
-| 1 | [Tên chủ đề 1] | [Số câu NB|TH|VD] | [Số ý NB|TH|VD] | [Số câu NB|TH|VD] | [Số câu NB|TH|VD] | ... | ... | ... |
-| 2 | [Tên chủ đề 2] | ... | ... | ... | ... | ... | ... | ... |
-| **TỔNG** | | **...** | **...** | **...** | **...** | **...** | **10.0** | **100%** |
-
----
-
-## BẢNG 2: BẢNG ĐẶC TẢ ĐỀ KIỂM TRA CHI TIẾT
-
-| STT | Chủ đề / Đơn vị kiến thức | Dạng câu hỏi | Mức độ nhận thức | Mức độ kiến thức / kĩ năng cần kiểm tra, đánh giá |
-| --- | --- | --- | --- | --- |
-| 1 | [Tên chủ đề 1] | Trắc nghiệm 4 lựa chọn | Nhận biết | Mô tả chi tiết yêu cầu kiến thức/kỹ năng cần kiểm tra... |
-| 2 | [Tên chủ đề 1] | Trắc nghiệm Đúng/Sai | Thông hiểu | Mô tả chi tiết bối cảnh và yêu cầu các mệnh đề... |
-| 3 | [Tên chủ đề 2] | Trả lời ngắn | Vận dụng | Mô tả chi tiết dạng bài toán tính toán đáp số... |
-| ... | ... | ... | ... | ... |
+1. Dựa trên tỷ lệ điểm/bố cục đã cho, tự động chọn dạng câu hỏi và phân bổ số lượng câu, mức độ nhận thức (NB, TH, VD) sao cho hợp lý.
+2. Xuất lại kết quả ma trận và đặc tả **đúng theo cấu trúc các bảng/sheet trong file Excel mẫu đính kèm** dưới dạng Bảng Text / Markdown (hoặc chỉnh sửa trực tiếp dữ liệu file nếu hỗ trợ) để tôi có thể dán/lưu lại vào file Excel mẫu.
