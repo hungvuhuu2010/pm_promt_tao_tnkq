@@ -37,6 +37,10 @@
         <button type="button" class="tab-btn" id="tabWithMatrixBtn" onclick="switchTab('with-matrix')">
             📊 TẠO PHIẾU BÀI TẬP THEO MA TRẬN
         </button>
+	<button type="button" class="tab-btn" id="tabGenerateMatrixBtn" onclick="switchTab('generate-matrix')">
+        📐 TẠO MA TRẬN ĐẶC TẢ
+    	</button>
+
     </nav>
 
     <!-- =====================================================
@@ -648,6 +652,127 @@
             </section>
 
         </div>
+
+
+<!-- =================================================================
+     TAB 3: TẠO MA TRẬN ĐẶC TẢ (MỚI)
+================================================================== -->
+<div id="tabGenerateMatrix" class="tab-content">
+
+    <!-- 1. THÔNG TIN CHUNG BÀI KIỂM TRA -->
+    <section class="card">
+        <div class="section-title">
+            <div class="section-number">1</div>
+            <div>
+                <h2>Thông tin bài kiểm tra & Yêu cầu tổng quan</h2>
+                <p>Nhập thông tin cơ bản và hình thức đánh giá để AI định hình ma trận</p>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="genMatrixSubject">Môn học</label>
+                <input type="text" id="genMatrixSubject" placeholder="Ví dụ: Toán">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixGrade">Lớp</label>
+                <input type="text" id="genMatrixGrade" placeholder="Ví dụ: 11">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixTime">Thời gian làm bài (Phút)</label>
+                <input type="text" id="genMatrixTime" placeholder="Ví dụ: 90 phút">
+            </div>
+
+            <div class="form-group">
+                <label for="genMatrixFormat">Cấu trúc đề kiểm tra</label>
+                <select id="genMatrixFormat">
+                    <option value="Kết hợp 4 phần (TN 4 lựa chọn + Đúng/Sai + Trả lời ngắn + Tự luận)">Kết hợp 4 phần chuẩn Bộ GD&ĐT (TN 4 lựa chọn, Đúng/Sai, Trả lời ngắn, Tự luận)</option>
+                    <option value="Trắc nghiệm 100% (4 lựa chọn)">100% Trắc nghiệm 4 lựa chọn</option>
+                    <option value="Trắc nghiệm kết hợp Tự luận">Trắc nghiệm 4 lựa chọn + Tự luận</option>
+                    <option value="Tự do (AI tự đề xuất phân bổ phù hợp)">Tự do (AI tự chọn dạng câu hỏi phù hợp nhất)</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. BỐ CỤC ĐIỂM / TỶ LỆ CÁC CHỦ ĐỀ -->
+    <section class="card">
+        <div class="section-title">
+            <div class="section-number">2</div>
+            <div>
+                <h2>Phân bổ Chủ đề / Đơn vị kiến thức & Bố cục điểm</h2>
+                <p>Nhập danh sách các chủ đề và tỷ lệ % điểm (hoặc số điểm) tương ứng</p>
+            </div>
+        </div>
+
+        <div class="matrix-table-wrapper">
+            <table class="detail-matrix-table" id="topicWeightTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">STT</th>
+                        <th>Tên Chủ đề / Chương / Đơn vị kiến thức</th>
+                        <th style="width: 150px;">Bố cục điểm / Tỷ lệ (%)</th>
+                        <th style="width: 250px;">Ghi chú / Trọng tâm cần khai thác</th>
+                        <th style="width: 50px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="1"></td>
+                        <td><input type="text" class="cell-topic-name" value="Hàm số mũ và Hàm số lôgarit"></td>
+                        <td><input type="text" class="cell-topic-weight" value="40% (4.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Tập xác định, đồ thị, phương trình mũ"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="2"></td>
+                        <td><input type="text" class="cell-topic-name" value="Hình học không gian & Thể tích"></td>
+                        <td><input type="text" class="cell-topic-weight" value="30% (3.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Quan hệ vuông góc, khoảng cách, thể tích khối chóp"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="cell-topic-stt" value="3"></td>
+                        <td><input type="text" class="cell-topic-name" value="Xác suất cổ điển"></td>
+                        <td><input type="text" class="cell-topic-weight" value="30% (3.0 điểm)"></td>
+                        <td><input type="text" class="cell-topic-note" value="Quy tắc cộng, nhân xác suất, biến cố độc lập"></td>
+                        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <button type="button" class="button secondary btn-add-row" onclick="addTopicRow()">+ Thêm Chủ đề</button>
+    </section>
+
+    <!-- ACTION -->
+    <section class="action-card">
+        <button type="button" class="button primary large" id="generateBuildMatrixPromptBtn">⚙ TẠO PROMPT SINH MA TRẬN</button>
+    </section>
+
+    <!-- KẾT QUẢ PROMPT TẠO MA TRẬN -->
+    <section class="card result-section" id="genMatrixResultSection">
+        <div class="section-title">
+            <div class="section-number">3</div>
+            <div>
+                <h2>Prompt yêu cầu AI sinh Ma trận đặc tả</h2>
+                <p>Copy prompt này gửi cho AI để nhận ma trận đặc tả hoàn chỉnh (có thể copy kết quả vào Excel/Tab 2)</p>
+            </div>
+        </div>
+
+        <div class="prompt-toolbar">
+            <button type="button" class="button success" id="copyGenMatrixPromptBtn">Sao chép prompt</button>
+            <button type="button" class="button error" id="clearGenMatrixResultBtn">Xóa</button>
+        </div>
+
+        <div class="form-group">
+            <textarea id="generatedBuildMatrixPrompt" rows="10" readonly placeholder="Prompt tạo ma trận sẽ xuất hiện ở đây..."></textarea>
+        </div>
+    </section>
+
+</div>
+
 
     </main>
 
