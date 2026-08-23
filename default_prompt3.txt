@@ -1,7 +1,7 @@
 # VAI TRÒ VÀ NHIỆM VỤ
 
 Bạn là một chuyên gia thiết kế ma trận đặc tả đề kiểm tra và đánh giá môn học chất lượng cao.
-Nhiệm vụ của bạn là xây dựng **BẢNG MA TRẬN ĐẶC TẢ CHI TIẾT** cho đề kiểm tra dựa trên thông tin bài kiểm tra và danh sách phân bổ chủ đề do giáo viên cung cấp dưới đây.
+Nhiệm vụ của bạn là xây dựng **MA TRẬN TỔNG HỢP VÀ BẢNG ĐẶC TẢ ĐỀ KIỂM TRA CHI TIẾT** dựa trên thông tin bài kiểm tra và danh sách phân bổ chủ đề do giáo viên cung cấp dưới đây.
 
 ---
 
@@ -20,20 +20,35 @@ Nhiệm vụ của bạn là xây dựng **BẢNG MA TRẬN ĐẶC TẢ CHI TI�
 
 ---
 
-# III. NGUYÊN TẮC THIẾT KẾ MA TRẬN TỰ ĐỘNG
+# III. NGUYÊN TẮC THIẾT KẾ MA TRẬN & ĐẶC TẢ TỰ ĐỘNG
 
-1. **Tự chọn dạng câu hỏi phù hợp:** Dựa vào cấu trúc ưu tiên và nội dung từng chủ đề, hãy tự động lựa chọn dạng câu hỏi (Trắc nghiệm 4 lựa chọn, Đúng/Sai 4 mệnh đề, Trả lời ngắn, Tự luận) và số lượng câu tương ứng cho mỗi chủ đề sao cho tổng điểm đạt đúng tỷ lệ % giáo viên đã yêu cầu.
-2. **Phân bổ theo 4 Phần chuẩn (tương ứng 4 Sheet của file mau_ma_tran.xlsx):**
-   - **Phần 1:** Câu trắc nghiệm nhiều phương án lựa chọn (4 lựa chọn, chỉ chọn 1 đáp án đúng).
-   - **Phần 2:** Câu trắc nghiệm Đúng/Sai (Mỗi câu có 1 bối cảnh chung + 4 mệnh đề a, b, c, d).
-   - **Phần 3:** Câu trắc nghiệm trả lời ngắn (Đáp số là số/biểu thức gọn).
-   - **Phần 4:** Câu hỏi Tự luận / Bài tập trình bày chi tiết.
-3. **Mô tả yêu cầu chi tiết:** Với từng câu hỏi/mệnh đề trong ma trận, hãy mô tả cụ thể kiến thức, kỹ năng cần kiểm tra (Ví dụ: "Tìm tập xác định của hàm số mũ", "Tính thể tích khối lăng trụ",...); không viết chung chung.
-4. **Mức độ nhận thức:** Phân bổ hợp lý giữa các mức độ Nhận biết (NB), Thông hiểu (TH) và Vận dụng (VD) cho từng câu/mệnh đề.
+1. **Phân bổ số câu & Điểm số:** Dựa trên tỷ lệ % điểm yêu cầu, tự động chọn dạng câu hỏi (TN 4 phương án, Đúng/Sai 4 mệnh đề, Trả lời ngắn, Tự luận) và phân bổ số lượng câu cho từng chủ đề sao cho hợp lý, đúng chuẩn điểm số.
+2. **Cấu trúc 2 Bảng bắt buộc:**
+   - **BẢNG 1: MA TRẬN ĐỀ KIỂM TRA** (Thống kê tổng hợp số lượng câu/ý theo từng Chủ đề, Dạng câu hỏi và Mức độ NB/TH/VD, kèm Tổng số câu, Điểm số và Tỷ lệ %).
+   - **BẢNG 2: BẢNG ĐẶC TẢ ĐỀ KIỂM TRA** (Mô tả chi tiết Mức độ kiến thức / kỹ năng cần kiểm tra cho từng câu/ý theo các mức độ NB, TH, VD).
 
 ---
 
 # IV. ĐỊNH DẠNG ĐẦU RA YÊU CẦU
 
-Hãy trình bày Ma trận đặc tả dưới dạng BẢNG TEXT / MARKDOWN TABLE chi tiết cho từng Phần (Phần 1 -> Phần 2 -> Phần 3 -> Phần 4) với các cột chuẩn:
-- **STT** | **Tên Đơn vị kiến thức** | **NB** | **TH** | **VD** | **Mức độ kiến thức / kĩ năng cần kiểm tra, đánh giá**
+Hãy xuất kết quả trình bày rõ ràng dưới dạng Markdown Table theo đúng cấu trúc mẫu sau:
+
+## BẢNG 1: MA TRẬN ĐỀ KIỂM TRA
+
+| STT | Chủ đề / Mạch kiến thức | Trắc nghiệm 4 lựa chọn (Số câu) | Trắc nghiệm Đúng/Sai (Số ý) | Trắc nghiệm Trả lời ngắn (Số câu) | Tự luận (Số câu) | Tổng số câu/ý | Điểm số | Tỷ lệ % |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| | | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | **NB** \| **TH** \| **VD** | | | |
+| 1 | [Tên chủ đề 1] | [Số câu NB|TH|VD] | [Số ý NB|TH|VD] | [Số câu NB|TH|VD] | [Số câu NB|TH|VD] | ... | ... | ... |
+| 2 | [Tên chủ đề 2] | ... | ... | ... | ... | ... | ... | ... |
+| **TỔNG** | | **...** | **...** | **...** | **...** | **...** | **10.0** | **100%** |
+
+---
+
+## BẢNG 2: BẢNG ĐẶC TẢ ĐỀ KIỂM TRA CHI TIẾT
+
+| STT | Chủ đề / Đơn vị kiến thức | Dạng câu hỏi | Mức độ nhận thức | Mức độ kiến thức / kĩ năng cần kiểm tra, đánh giá |
+| --- | --- | --- | --- | --- |
+| 1 | [Tên chủ đề 1] | Trắc nghiệm 4 lựa chọn | Nhận biết | Mô tả chi tiết yêu cầu kiến thức/kỹ năng cần kiểm tra... |
+| 2 | [Tên chủ đề 1] | Trắc nghiệm Đúng/Sai | Thông hiểu | Mô tả chi tiết bối cảnh và yêu cầu các mệnh đề... |
+| 3 | [Tên chủ đề 2] | Trả lời ngắn | Vận dụng | Mô tả chi tiết dạng bài toán tính toán đáp số... |
+| ... | ... | ... | ... | ... |
