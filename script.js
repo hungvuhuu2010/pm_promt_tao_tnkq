@@ -1,2726 +1,577 @@
 /* =========================================================
-   AI PROMPT BUILDER
-   script.js
-   Phiên bản dùng hệ thống biến trong default-prompt.txt
+   AI PROMPT BUILDER - script.js
+   Bảo toàn chức năng cũ & Bổ sung Tạo phiếu theo Ma trận
 ========================================================= */
 
-"use strict";
-
-/* =========================================================
-   1. CONFIG
-========================================================= */
-
-const DEFAULT_PROMPT_FILE = "default-prompt.txt";
-
-
-/* =========================================================
-   2. DOM HELPER
-========================================================= */
-
-function $(id) {
-    return document.getElementById(id);
-}
-
-
-/* =========================================================
-   3. DOM ELEMENTS
-========================================================= */
-
-const elements = {
-
-    promptStatus: $("promptStatus"),
-
-    subject: $("subject"),
-    grade: $("grade"),
-    topic: $("topic"),
-    studentLevel: $("studentLevel"),
-    purpose: $("purpose"),
-
-    customRequirements: $("customRequirements"),
-
-    promptFile: $("promptFile"),
-    promptFileName: $("promptFileName"),
-    promptTemplate: $("promptTemplate"),
-    resetPromptBtn: $("resetPromptBtn"),
-
-    generatePromptBtn: $("generatePromptBtn"),
-    generatedPrompt: $("generatedPrompt"),
-    copyPromptBtn: $("copyPromptBtn"),
-    clearResultBtn: $("clearResultBtn"),
-
-    advancedToggle: $("advancedToggle"),
-    advancedContent: $("advancedContent"),
-
-    sourceFiles: $("sourceFiles"),
-    sourceFileList: $("sourceFileList"),
-    sourceWarning: $("sourceWarning"),
-
-    aiProvider: $("aiProvider"),
-    aiModel: $("aiModel"),
-    apiKey: $("apiKey"),
-
-    generateAIButton: $("generateAIButton"),
-
-    aiResultSection: $("aiResultSection"),
-    aiResult: $("aiResult"),
-
-    copyAIResultBtn: $("copyAIResultBtn"),
-
-    toast: $("toast")
-
-};
-
-
-/* =========================================================
-   4. STATE
-========================================================= */
-
+// State quản lý dữ liệu ứng dụng
 const state = {
-
-    defaultPrompt: "",
-
-    currentPromptSource: DEFAULT_PROMPT_FILE,
-
+    activeTab: 'no-matrix', // 'no-matrix' hoặc 'with-matrix'
+    promptTemplate: '',
+    matrixPromptTemplate: '',
     sourceFiles: [],
-
-    matrix: {
-
-        mcq: {
-            enabled: true,
-            NB: 0,
-            TH: 0,
-            VD: 0,
-            VDC: 0,
-            total: 0
-        },
-
-        tf: {
-            enabled: true,
-            NB: 0,
-            TH: 0,
-            VD: 0,
-            VDC: 0,
-            total: 0
-        },
-
-        short: {
-            enabled: true,
-            NB: 0,
-            TH: 0,
-            VD: 0,
-            VDC: 0,
-            total: 0
-        }
-
-    },
-
-    totals: {
-
-        NB: 0,
-        TH: 0,
-        VD: 0,
-        VDC: 0,
-        total: 0
-
-    },
-
-    lastPrompt: "",
-
-    aiResult: ""
-
+    sourceMode: 'reference'
 };
 
+// Chuỗi Prompt mặc định cho Tab 2 (theo Ma trận) nếu chưa tải được file default_prompt2.txt
+const DEFAULT_MATRIX_PROMPT = `VAI TRÒ VÀ NHIỆM VỤ:
+Bạn là chuyên gia thiết kế câu hỏi kiểm tra đánh giá. Hãy xây dựng phiếu bài tập dựa trên Ma trận chi tiết bên dưới.
+
+I. THÔNG TIN CHUNG:
+- Môn học: {MON_HOC}
+- Lớp: {LOP}
+- Chủ đề: {CHU_DE}
+
+II. MA TRẬN CHI TIẾT DẠNG CÂU HỎI:
+
+1. PHẦN 1: Trắc nghiệm 4 lựa chọn
+{BANG_PHAN_1}
+
+2. PHẦN 2: Trắc nghiệm Đúng/Sai (4 mệnh đề)
+{BANG_PHAN_2}
+
+3. PHẦN 3: Trắc nghiệm Trả lời ngắn
+{BANG_PHAN_3}
+
+4. PHẦN 4: Tự luận / Khác
+{BANG_PHAN_4}
+
+III. YÊU CẦU:
+1. Tạo đúng số lượng, dạng câu hỏi và mức độ nhận thức theo bảng ma trận chi tiết trên.
+2. Với từng câu hỏi, cung cấp đầy đủ đáp án và lời giải chi tiết.
+`;
 
 /* =========================================================
-   5. INITIALIZE
+   1. KHỞI TẠO VÀ CHUYỂN TAB
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    init
-);
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    setupEventListeners();
+    calculateMatrixTotals();
+});
 
-
-async function init() {
-
-    setupEvents();
-
-    updateMatrix();
-
-    await loadDefaultPrompt();
-
+function initApp() {
+    // Tải prompt mặc định cho Tab 1
+    loadDefaultPrompt();
+    // Tải prompt mặc định cho Tab 2
+    loadDefaultMatrixPrompt();
+    // Cập nhật ma trận đơn giản (Tab 1)
+    updateNoMatrixTotals();
+    
+    // Phôi phục tab cũ từ localStorage nếu có
+    const savedTab = localStorage.getItem('activeTab');
+    if (savedTab) {
+        switchTab(savedTab);
+    }
 }
 
+function switchTab(tabName) {
+    state.activeTab = tabName;
+    localStorage.setItem('activeTab', tabName);
+
+    const tabNoMatrixBtn = document.getElementById('tabNoMatrixBtn');
+    const tabWithMatrixBtn = document.getElementById('tabWithMatrixBtn');
+    const tabNoMatrix = document.getElementById('tabNoMatrix');
+    const tabWithMatrix = document.getElementById('tabWithMatrix');
+
+    if (tabName === 'no-matrix') {
+        tabNoMatrixBtn.classList.add('active');
+        tabWithMatrixBtn.classList.remove('active');
+        tabNoMatrix.classList.add('active');
+        tabWithMatrix.classList.remove('active');
+    } else {
+        tabWithMatrixBtn.classList.add('active');
+        tabNoMatrixBtn.classList.remove('active');
+        tabWithMatrix.classList.add('active');
+        tabNoMatrix.classList.remove('active');
+    }
+}
 
 /* =========================================================
-   6. EVENT SETUP
+   2. TẢI VÀ XỬ LÝ PROMPT TEMPLATE (TAB 1 & TAB 2)
 ========================================================= */
 
-function setupEvents() {
+function loadDefaultPrompt() {
+    const statusBadge = document.getElementById('promptStatus');
+    const fileNameDiv = document.getElementById('promptFileName');
+    const textarea = document.getElementById('promptTemplate');
 
-    /*
-       Ma trận
-    */
+    if (statusBadge) statusBadge.className = 'status-badge loading', statusBadge.textContent = 'Đang tải prompt...';
 
-    document
-        .querySelectorAll(".matrix-input")
-        .forEach(input => {
-
-            input.addEventListener(
-                "input",
-                updateMatrix
-            );
-
-            input.addEventListener(
-                "change",
-                updateMatrix
-            );
-
+    fetch('default-prompt.txt')
+        .then(res => {
+            if (!res.ok) throw new Error('Không tìm thấy default-prompt.txt');
+            return res.text();
+        })
+        .then(text => {
+            state.promptTemplate = text;
+            if (textarea) textarea.value = text;
+            if (statusBadge) statusBadge.className = 'status-badge success', statusBadge.textContent = 'Sẵn sàng';
+            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: default-prompt.txt (mặc định)';
+        })
+        .catch(err => {
+            console.warn('Lỗi tải default-prompt.txt:', err);
+            if (statusBadge) statusBadge.className = 'status-badge error', statusBadge.textContent = 'Chưa có prompt';
+            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: Không tìm thấy file mẫu';
         });
+}
 
+function loadDefaultMatrixPrompt() {
+    fetch('default_prompt2.txt')
+        .then(res => {
+            if (!res.ok) throw new Error('Không tìm thấy default_prompt2.txt');
+            return res.text();
+        })
+        .then(text => {
+            state.matrixPromptTemplate = text;
+        })
+        .catch(err => {
+            console.warn('Lỗi tải default_prompt2.txt, dùng template dự phòng:', err);
+            state.matrixPromptTemplate = DEFAULT_MATRIX_PROMPT;
+        });
+}
 
-    /*
-       Checkbox loại câu hỏi
-    */
+/* =========================================================
+   3. LOGIC TAB 1: TẠO PHIẾU KHÔNG THEO MA TRẬN
+========================================================= */
 
-    [
-        "enableMCQ",
-        "enableTF",
-        "enableShort"
+function updateNoMatrixTotals() {
+    const getVal = (id) => parseInt(document.getElementById(id)?.value || 0, 10);
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-    ].forEach(id => {
+    const enableMCQ = document.getElementById('enableMCQ')?.checked ?? true;
+    const enableTF = document.getElementById('enableTF')?.checked ?? true;
+    const enableShort = document.getElementById('enableShort')?.checked ?? true;
 
-        const checkbox = $(id);
+    const mcqNB = enableMCQ ? getVal('mcqNB') : 0;
+    const mcqTH = enableMCQ ? getVal('mcqTH') : 0;
+    const mcqVD = enableMCQ ? getVal('mcqVD') : 0;
+    const mcqVDC = enableMCQ ? getVal('mcqVDC') : 0;
+    const mcqTotal = mcqNB + mcqTH + mcqVD + mcqVDC;
+    setTxt('mcqTotal', mcqTotal);
 
-        if (!checkbox) {
-            return;
+    const tfNB = enableTF ? getVal('tfNB') : 0;
+    const tfTH = enableTF ? getVal('tfTH') : 0;
+    const tfVD = enableTF ? getVal('tfVD') : 0;
+    const tfVDC = enableTF ? getVal('tfVDC') : 0;
+    const tfTotal = tfNB + tfTH + tfVD + tfVDC;
+    setTxt('tfTotal', tfTotal);
+
+    const shortNB = enableShort ? getVal('shortNB') : 0;
+    const shortTH = enableShort ? getVal('shortTH') : 0;
+    const shortVD = enableShort ? getVal('shortVD') : 0;
+    const shortVDC = enableShort ? getVal('shortVDC') : 0;
+    const shortTotal = shortNB + shortTH + shortVD + shortVDC;
+    setTxt('shortTotal', shortTotal);
+
+    const grandNB = mcqNB + tfNB + shortNB;
+    const grandTH = mcqTH + tfTH + shortTH;
+    const grandVD = mcqVD + tfVD + shortVD;
+    const grandVDC = mcqVDC + tfVDC + shortVDC;
+    const grandTotal = mcqTotal + tfTotal + shortTotal;
+
+    setTxt('grandNB', grandNB);
+    setTxt('grandTH', grandTH);
+    setTxt('grandVD', grandVD);
+    setTxt('grandVDC', grandVDC);
+    setTxt('grandTotal', grandTotal);
+}
+
+function generateNoMatrixPrompt() {
+    let template = document.getElementById('promptTemplate')?.value || state.promptTemplate;
+    if (!template) {
+        showToast('Vui lòng nhập hoặc tải Prompt mẫu!');
+        return;
+    }
+
+    const subject = document.getElementById('subject')?.value || '[MON_HOC]';
+    const grade = document.getElementById('grade')?.value || '[LOP]';
+    const topic = document.getElementById('topic')?.value || '[CHU_DE]';
+    const studentLevel = document.getElementById('studentLevel')?.value || '[DOI_TUONG]';
+    const purpose = document.getElementById('purpose')?.value || '[MUC_DICH_SU_DUNG]';
+
+    template = template.replace(/\[MON_HOC\]/g, subject)
+                       .replace(/\[LOP\]/g, grade)
+                       .replace(/\[CHU_DE\]/g, topic)
+                       .replace(/\[DOI_TUONG\]/g, studentLevel)
+                       .replace(/\[MUC_DICH_SU_DUNG\]/g, purpose);
+
+    // Thay thế số lượng ma trận
+    const getVal = (id) => document.getElementById(id)?.value || '0';
+    template = template.replace(/\[MCQ_NB\]/g, getVal('mcqNB'))
+                       .replace(/\[MCQ_TH\]/g, getVal('mcqTH'))
+                       .replace(/\[MCQ_VD\]/g, getVal('mcqVD'))
+                       .replace(/\[MCQ_VDC\]/g, getVal('mcqVDC'))
+                       .replace(/\[MCQ_TONG\]/g, document.getElementById('mcqTotal')?.textContent || '0')
+                       .replace(/\[TF_NB\]/g, getVal('tfNB'))
+                       .replace(/\[TF_TH\]/g, getVal('tfTH'))
+                       .replace(/\[TF_VD\]/g, getVal('tfVD'))
+                       .replace(/\[TF_VDC\]/g, getVal('tfVDC'))
+                       .replace(/\[TF_TONG\]/g, document.getElementById('tfTotal')?.textContent || '0')
+                       .replace(/\[SHORT_NB\]/g, getVal('shortNB'))
+                       .replace(/\[SHORT_TH\]/g, getVal('shortTH'))
+                       .replace(/\[SHORT_VD\]/g, getVal('shortVD'))
+                       .replace(/\[SHORT_VDC\]/g, getVal('shortVDC'))
+                       .replace(/\[SHORT_TONG\]/g, document.getElementById('shortTotal')?.textContent || '0')
+                       .replace(/\[TONG_SO_CAU\]/g, document.getElementById('grandTotal')?.textContent || '0');
+
+    const resultArea = document.getElementById('generatedPrompt');
+    if (resultArea) {
+        resultArea.value = template;
+        showToast('Đã tạo Prompt thành công!');
+    }
+}
+
+/* =========================================================
+   4. LOGIC TAB 2: QUẢN LÝ VÀ TÍNH TOÁN MA TRẬN CHI TIẾT
+========================================================= */
+
+function toggleAccordion(buttonEl) {
+    const item = buttonEl.closest('.accordion-item');
+    if (item) {
+        item.classList.toggle('closed');
+    }
+}
+
+function addMatrixRow(tableId, sectionType) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const tbody = table.querySelector('tbody');
+    const rowCount = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+
+    if (sectionType === 2) {
+        // Phần 2: Đúng / Sai
+        tr.innerHTML = `
+            <td><input type="text" class="cell-stt" value="${rowCount}"></td>
+            <td><input type="text" class="cell-sub" value="a"></td>
+            <td><input type="text" class="cell-topic" value=""></td>
+            <td class="text-center"><input type="checkbox" class="cell-nb" onclick="calculateMatrixTotals()"></td>
+            <td class="text-center"><input type="checkbox" class="cell-th" onclick="calculateMatrixTotals()"></td>
+            <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+            <td><input type="text" class="cell-desc" value=""></td>
+            <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+        `;
+    } else {
+        // Các phần 1, 3, 4
+        tr.innerHTML = `
+            <td><input type="text" class="cell-stt" value="${rowCount}"></td>
+            <td><input type="text" class="cell-topic" value=""></td>
+            <td class="text-center"><input type="checkbox" class="cell-nb" onclick="calculateMatrixTotals()"></td>
+            <td class="text-center"><input type="checkbox" class="cell-th" onclick="calculateMatrixTotals()"></td>
+            <td class="text-center"><input type="checkbox" class="cell-vd" onclick="calculateMatrixTotals()"></td>
+            <td><input type="text" class="cell-desc" value=""></td>
+            <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+        `;
+    }
+
+    tbody.appendChild(tr);
+    calculateMatrixTotals();
+}
+
+function deleteMatrixRow(btn) {
+    const tr = btn.closest('tr');
+    if (tr) {
+        tr.remove();
+        calculateMatrixTotals();
+    }
+}
+
+function calculateMatrixTotals() {
+    const calcSection = (tableId) => {
+        let nb = 0, th = 0, vd = 0;
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        rows.forEach(r => {
+            if (r.querySelector('.cell-nb')?.checked) nb++;
+            if (r.querySelector('.cell-th')?.checked) th++;
+            if (r.querySelector('.cell-vd')?.checked) vd++;
+        });
+        return { nb, th, vd, total: nb + th + vd };
+    };
+
+    const s1 = calcSection('tableSection1');
+    const s2 = calcSection('tableSection2');
+    const s3 = calcSection('tableSection3');
+    const s4 = calcSection('tableSection4');
+
+    const updateSecUI = (prefix, data) => {
+        document.getElementById(`${prefix}NB`).textContent = data.nb;
+        document.getElementById(`${prefix}TH`).textContent = data.th;
+        document.getElementById(`${prefix}VD`).textContent = data.vd;
+        document.getElementById(`${prefix}Total`).textContent = data.total;
+    };
+
+    updateSecUI('sec1', s1);
+    updateSecUI('sec2', s2);
+    updateSecUI('sec3', s3);
+    updateSecUI('sec4', s4);
+
+    const grandNB = s1.nb + s2.nb + s3.nb + s4.nb;
+    const grandTH = s1.th + s2.th + s3.th + s4.th;
+    const grandVD = s1.vd + s2.vd + s3.vd + s4.vd;
+    const grandTotal = s1.total + s2.total + s3.total + s4.total;
+
+    document.getElementById('matrixGrandNB').textContent = grandNB;
+    document.getElementById('matrixGrandTH').textContent = grandTH;
+    document.getElementById('matrixGrandVD').textContent = grandVD;
+    document.getElementById('matrixGrandTotal').textContent = grandTotal;
+}
+
+/* =========================================================
+   5. TẢI FILE EXCEL MA TRẬN (MAU_MA_TRAN.XLSX)
+========================================================= */
+
+function handleExcelUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    document.getElementById('excelFileName').textContent = `Đã chọn: ${file.name}`;
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+        try {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Render lại từng sheet vào 4 table tương ứng
+            if (workbook.SheetNames.length >= 1) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
+            if (workbook.SheetNames.length >= 2) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[1]], 'tableSection2', 2);
+            if (workbook.SheetNames.length >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[2]], 'tableSection3', 3);
+            if (workbook.SheetNames.length >= 4) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection4', 4);
+
+            calculateMatrixTotals();
+            showToast('Đã tải ma trận từ Excel thành công!');
+        } catch (err) {
+            console.error('Lỗi đọc file Excel:', err);
+            showToast('Lỗi đọc file Excel! Kiểm tra lại định dạng file.');
         }
+    };
+    reader.readAsArrayBuffer(file);
+}
 
-        checkbox.addEventListener(
-            "change",
-            updateMatrix
-        );
+function parseExcelSheetToTable(sheet, tableId, sectionType) {
+    const table = document.getElementById(tableId);
+    if (!table || !sheet) return;
 
+    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = ''; // Xóa hết dòng cũ
+
+    // Lặp qua dữ liệu Excel, bỏ qua dòng tiêu đề
+    for (let i = 0; i < jsonData.length; i++) {
+        const row = jsonData[i];
+        if (!row || row.length === 0) continue;
+
+        // Bỏ qua các hàng tiêu đề ngắn hoặc chứa từ khóa không phải dữ liệu
+        const rowStr = row.join(' ').toLowerCase();
+        if (rowStr.includes('dạng thức') || rowStr.includes('thành phần năng lực') || rowStr.includes('phần')) continue;
+
+        if (sectionType === 2) {
+            // Cấu trúc Phần 2: STT, Ý, Đơn vị kiến thức, NB, TH, VD, Mô tả
+            const stt = row[1] || '';
+            const sub = row[2] || '';
+            const topic = row[3] || row[0] || '';
+            const isNB = row[4] == '1' || row[4] == 'x' || row[4] == 'X';
+            const isTH = row[5] == '1' || row[5] == 'x' || row[5] == 'X';
+            const isVD = row[6] == '1' || row[6] == 'x' || row[6] == 'X';
+            const desc = row[7] || row[6] || '';
+
+            if (!stt && !sub && !topic && !desc) continue;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="cell-stt" value="${stt}"></td>
+                <td><input type="text" class="cell-sub" value="${sub}"></td>
+                <td><input type="text" class="cell-topic" value="${topic}"></td>
+                <td class="text-center"><input type="checkbox" class="cell-nb" ${isNB ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td class="text-center"><input type="checkbox" class="cell-th" ${isTH ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td class="text-center"><input type="checkbox" class="cell-vd" ${isVD ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td><input type="text" class="cell-desc" value="${desc}"></td>
+                <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+        } else {
+            // Phần 1, 3, 4: STT, Đơn vị kiến thức, NB, TH, VD, Mô tả
+            const stt = row[1] || row[0] || '';
+            const topic = row[3] || row[2] || '';
+            const isNB = row[4] == '1' || row[4] == 'x' || row[4] == 'X';
+            const isTH = row[5] == '1' || row[5] == 'x' || row[5] == 'X';
+            const isVD = row[6] == '1' || row[6] == 'x' || row[6] == 'X';
+            const desc = row[7] || row[6] || '';
+
+            if (!stt && !topic && !desc) continue;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="cell-stt" value="${stt}"></td>
+                <td><input type="text" class="cell-topic" value="${topic}"></td>
+                <td class="text-center"><input type="checkbox" class="cell-nb" ${isNB ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td class="text-center"><input type="checkbox" class="cell-th" ${isTH ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td class="text-center"><input type="checkbox" class="cell-vd" ${isVD ? 'checked' : ''} onclick="calculateMatrixTotals()"></td>
+                <td><input type="text" class="cell-desc" value="${desc}"></td>
+                <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+        }
+    }
+}
+
+/* =========================================================
+   6. TẠO PROMPT THEO MA TRẬN
+========================================================= */
+
+function generateMatrixPrompt() {
+    let template = state.matrixPromptTemplate || DEFAULT_MATRIX_PROMPT;
+
+    const subject = document.getElementById('matrixSubject')?.value || '[MON_HOC]';
+    const grade = document.getElementById('matrixGrade')?.value || '[LOP]';
+    const topic = document.getElementById('matrixTopic')?.value || '[CHU_DE]';
+
+    template = template.replace(/\{MON_HOC\}/g, subject)
+                       .replace(/\{LOP\}/g, grade)
+                       .replace(/\{CHU_DE\}/g, topic);
+
+    // Render chuỗi văn bản cho 4 bảng
+    const formatTableText = (tableId, hasSub) => {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        if (rows.length === 0) return '(Không có câu hỏi)';
+
+        let text = '';
+        rows.forEach((r, idx) => {
+            const stt = r.querySelector('.cell-stt')?.value || (idx + 1);
+            const topic = r.querySelector('.cell-topic')?.value || '';
+            const isNB = r.querySelector('.cell-nb')?.checked ? 'Nhận biết' : '';
+            const isTH = r.querySelector('.cell-th')?.checked ? 'Thông hiểu' : '';
+            const isVD = r.querySelector('.cell-vd')?.checked ? 'Vận dụng' : '';
+            const level = [isNB, isTH, isVD].filter(Boolean).join('/') || 'Chưa chọn';
+            const desc = r.querySelector('.cell-desc')?.value || '';
+
+            if (hasSub) {
+                const sub = r.querySelector('.cell-sub')?.value || '';
+                text += `+ Câu ${stt}, Ý ${sub}: Đơn vị kiến thức [${topic}] - Mức độ: [${level}] - Yêu cầu: ${desc}\n`;
+            } else {
+                text += `+ Câu ${stt}: Đơn vị kiến thức [${topic}] - Mức độ: [${level}] - Yêu cầu: ${desc}\n`;
+            }
+        });
+        return text;
+    };
+
+    template = template.replace('{BANG_PHAN_1}', formatTableText('tableSection1', false))
+                       .replace('{BANG_PHAN_2}', formatTableText('tableSection2', true))
+                       .replace('{BANG_PHAN_3}', formatTableText('tableSection3', false))
+                       .replace('{BANG_PHAN_4}', formatTableText('tableSection4', false));
+
+    const resultArea = document.getElementById('generatedMatrixPrompt');
+    if (resultArea) {
+        resultArea.value = template;
+        showToast('Đã tạo Prompt theo ma trận!');
+    }
+}
+
+/* =========================================================
+   7. XUẤT MA TRẬN NÀY RA FILE EXCEL (.XLSX)
+========================================================= */
+
+function exportMatrixToExcel() {
+    if (typeof XLSX === 'undefined') {
+        showToast('Thư viện XLSX chưa sẵn sàng!');
+        return;
+    }
+
+    const wb = XLSX.utils.book_new();
+
+    const getTableData = (tableId, hasSub) => {
+        const rows = document.querySelectorAll(`#${tableId} tbody tr`);
+        const data = [];
+        rows.forEach(r => {
+            const stt = r.querySelector('.cell-stt')?.value || '';
+            const topic = r.querySelector('.cell-topic')?.value || '';
+            const nb = r.querySelector('.cell-nb')?.checked ? 'X' : '';
+            const th = r.querySelector('.cell-th')?.checked ? 'X' : '';
+            const vd = r.querySelector('.cell-vd')?.checked ? 'X' : '';
+            const desc = r.querySelector('.cell-desc')?.value || '';
+
+            if (hasSub) {
+                const sub = r.querySelector('.cell-sub')?.value || '';
+                data.push({ "STT": stt, "Ý": sub, "Đơn vị kiến thức": topic, "NB": nb, "TH": th, "VD": vd, "Mô tả yêu cầu": desc });
+            } else {
+                data.push({ "STT": stt, "Đơn vị kiến thức": topic, "NB": nb, "TH": th, "VD": vd, "Mô tả yêu cầu": desc });
+            }
+        });
+        return data;
+    };
+
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getTableData('tableSection1', false)), "Phan 1");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getTableData('tableSection2', true)), "Phan 2");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getTableData('tableSection3', false)), "Phan 3");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(getTableData('tableSection4', false)), "Phan 4");
+
+    XLSX.writeFile(wb, "Ma_tran_de_thi.xlsx");
+    showToast('Đã tải file Excel ma trận!');
+}
+
+/* =========================================================
+   8. EVENT LISTENERS
+========================================================= */
+
+function setupEventListeners() {
+    // Tab 1 Events
+    document.getElementById('generatePromptBtn')?.addEventListener('click', generateNoMatrixPrompt);
+    document.getElementById('copyPromptBtn')?.addEventListener('click', () => {
+        const txt = document.getElementById('generatedPrompt')?.value;
+        if (txt) { navigator.clipboard.writeText(txt); showToast('Đã sao chép prompt!'); }
+    });
+    document.getElementById('clearResultBtn')?.addEventListener('click', () => {
+        const res = document.getElementById('generatedPrompt');
+        if (res) res.value = '';
     });
 
+    // Inputs thay đổi số lượng ở Tab 1
+    const matrixInputs = document.querySelectorAll('.matrix-input, #enableMCQ, #enableTF, #enableShort');
+    matrixInputs.forEach(input => input.addEventListener('input', updateNoMatrixTotals));
 
-    /*
-       File prompt
-    */
+    // Tab 2 Events
+    document.getElementById('excelMatrixFile')?.addEventListener('change', handleExcelUpload);
+    document.getElementById('generateMatrixPromptBtn')?.addEventListener('click', generateMatrixPrompt);
+    document.getElementById('exportMatrixExcelBtn')?.addEventListener('click', exportMatrixToExcel);
+    document.getElementById('copyMatrixPromptBtn')?.addEventListener('click', () => {
+        const txt = document.getElementById('generatedMatrixPrompt')?.value;
+        if (txt) { navigator.clipboard.writeText(txt); showToast('Đã sao chép prompt!'); }
+    });
+    document.getElementById('clearMatrixResultBtn')?.addEventListener('click', () => {
+        const res = document.getElementById('generatedMatrixPrompt');
+        if (res) res.value = '';
+    });
 
-    if (elements.promptFile) {
+    // Toggle Advanced Section
+    document.getElementById('advancedToggle')?.addEventListener('click', function () {
+        this.classList.toggle('open');
+        const content = document.getElementById('advancedContent');
+        if (content) content.classList.toggle('hidden');
+    });
+}
 
-        elements.promptFile.addEventListener(
-            "change",
-            handlePromptFile
-        );
-
-    }
-
-
-    /*
-       Khôi phục prompt mặc định
-    */
-
-    if (elements.resetPromptBtn) {
-
-        elements.resetPromptBtn.addEventListener(
-            "click",
-            resetPrompt
-        );
-
-    }
-
-
-    /*
-       Tạo prompt
-    */
-
-    if (elements.generatePromptBtn) {
-
-        elements.generatePromptBtn.addEventListener(
-            "click",
-            generatePrompt
-        );
-
-    }
-
-
-    /*
-       Sao chép prompt
-    */
-
-    if (elements.copyPromptBtn) {
-
-        elements.copyPromptBtn.addEventListener(
-            "click",
-            () => {
-
-                copyText(
-                    elements.generatedPrompt.value,
-                    "Đã sao chép prompt."
-                );
-
-            }
-        );
-
-    }
-
-
-    /*
-       Xóa prompt
-    */
-
-    if (elements.clearResultBtn) {
-
-        elements.clearResultBtn.addEventListener(
-            "click",
-            clearResult
-        );
-
-    }
-
-
-    /*
-       Khối nâng cao
-    */
-
-    if (elements.advancedToggle) {
-
-        elements.advancedToggle.addEventListener(
-            "click",
-            toggleAdvanced
-        );
-
-    }
-
-
-    /*
-       Tài liệu nguồn
-    */
-
-    if (elements.sourceFiles) {
-
-        elements.sourceFiles.addEventListener(
-            "change",
-            handleSourceFiles
-        );
-
-    }
-
-
-    /*
-       Tạo phiếu bằng AI
-    */
-
-    if (elements.generateAIButton) {
-
-        elements.generateAIButton.addEventListener(
-            "click",
-            generateWithAI
-        );
-
-    }
-
-
-    /*
-       Sao chép phiếu AI
-    */
-
-    if (elements.copyAIResultBtn) {
-
-        elements.copyAIResultBtn.addEventListener(
-            "click",
-            () => {
-
-                copyText(
-                    elements.aiResult.innerText,
-                    "Đã sao chép phiếu bài tập."
-                );
-
-            }
-        );
-
-    }
-
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 
 /* =========================================================
-   7. NUMBER HELPER
+   BỔ SUNG: TẢI FILE MA TRẬN MẪU (MAU_MA_TRAN.XLSX)
 ========================================================= */
 
-function getNumber(id) {
-
-    const element = $(id);
-
-    if (!element) {
-        return 0;
-    }
-
-    let value = Number(
-        element.value
-    );
-
-    if (!Number.isFinite(value)) {
-        return 0;
-    }
-
-    value = Math.floor(value);
-
-    if (value < 0) {
-        value = 0;
-    }
-
-    return value;
-
+function downloadTemplateMatrix() {
+    const filePath = "mau_ma_tran.xlsx";
+    const link = document.createElement("a");
+    link.href = filePath;
+    link.download = "mau_ma_tran.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Đang tải file ma trận mẫu...');
 }
-
-
-/* =========================================================
-   8. UPDATE MATRIX
-========================================================= */
-
-function updateMatrix() {
-
-    const types = {
-
-        mcq: {
-            checkbox: "enableMCQ",
-            totalElement: "mcqTotal"
-        },
-
-        tf: {
-            checkbox: "enableTF",
-            totalElement: "tfTotal"
-        },
-
-        short: {
-            checkbox: "enableShort",
-            totalElement: "shortTotal"
-        }
-
-    };
-
-
-    /*
-       Reset tổng
-    */
-
-    state.totals = {
-
-        NB: 0,
-        TH: 0,
-        VD: 0,
-        VDC: 0,
-        total: 0
-
-    };
-
-
-    Object.keys(types).forEach(
-        type => {
-
-            const config =
-                types[type];
-
-
-            const checkbox =
-                $(config.checkbox);
-
-
-            const enabled =
-                checkbox
-                    ? checkbox.checked
-                    : false;
-
-
-            state.matrix[type].enabled =
-                enabled;
-
-
-            let total = 0;
-
-
-            [
-                "NB",
-                "TH",
-                "VD",
-                "VDC"
-
-            ].forEach(level => {
-
-                const input =
-                    $(
-                        getMatrixInputId(
-                            type,
-                            level
-                        )
-                    );
-
-
-                let value = 0;
-
-
-                if (
-                    enabled &&
-                    input
-                ) {
-
-                    value =
-                        getNumber(
-                            input.id
-                        );
-
-                }
-
-
-                state.matrix[type][level] =
-                    value;
-
-
-                total += value;
-
-
-                if (enabled) {
-
-                    state.totals[level] +=
-                        value;
-
-                }
-
-            });
-
-
-            state.matrix[type].total =
-                total;
-
-
-            /*
-               Hiển thị tổng từng dạng
-            */
-
-            if (
-                $(config.totalElement)
-            ) {
-
-                $(config.totalElement)
-                    .textContent =
-                    total;
-
-            }
-
-
-            /*
-               Làm mờ dòng khi tắt
-            */
-
-            const row =
-                checkbox
-                    ? checkbox.closest("tr")
-                    : null;
-
-
-            if (row) {
-
-                row.classList.toggle(
-                    "disabled",
-                    !enabled
-                );
-
-            }
-
-        }
-    );
-
-
-    /*
-       Tổng toàn phiếu
-    */
-
-    state.totals.total =
-        state.totals.NB +
-        state.totals.TH +
-        state.totals.VD +
-        state.totals.VDC;
-
-
-    /*
-       Hiển thị tổng
-    */
-
-    setText(
-        "grandNB",
-        state.totals.NB
-    );
-
-    setText(
-        "grandTH",
-        state.totals.TH
-    );
-
-    setText(
-        "grandVD",
-        state.totals.VD
-    );
-
-    setText(
-        "grandVDC",
-        state.totals.VDC
-    );
-
-    setText(
-        "grandTotal",
-        state.totals.total
-    );
-
-}
-
-
-/* =========================================================
-   9. MATRIX INPUT ID
-========================================================= */
-
-function getMatrixInputId(
-    type,
-    level
-) {
-
-    const prefix = {
-
-        mcq: "mcq",
-        tf: "tf",
-        short: "short"
-
-    }[type];
-
-
-    return `${prefix}${level}`;
-
-}
-
-
-/* =========================================================
-   10. SET TEXT
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element = $(id);
-
-    if (element) {
-
-        element.textContent =
-            value;
-
-    }
-
-}
-
-
-/* =========================================================
-   11. LOAD DEFAULT PROMPT
-========================================================= */
-
-async function loadDefaultPrompt() {
-
-    updateStatus(
-        "Đang tải prompt mẫu...",
-        "loading"
-    );
-
-
-    try {
-
-        const response =
-            await fetch(
-                DEFAULT_PROMPT_FILE,
-                {
-                    cache: "no-cache"
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `HTTP ${response.status}`
-            );
-
-        }
-
-
-        const text =
-            await response.text();
-
-
-        if (!text.trim()) {
-
-            throw new Error(
-                "File prompt mẫu trống."
-            );
-
-        }
-
-
-        state.defaultPrompt =
-            text;
-
-
-        state.currentPromptSource =
-            DEFAULT_PROMPT_FILE;
-
-
-        if (
-            elements.promptTemplate
-        ) {
-
-            elements.promptTemplate.value =
-                text;
-
-        }
-
-
-        if (
-            elements.promptFileName
-        ) {
-
-            elements.promptFileName.textContent =
-                `Nguồn: ${DEFAULT_PROMPT_FILE}`;
-
-        }
-
-
-        updateStatus(
-            "Đã tải prompt mẫu",
-            "success"
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Không đọc được default-prompt.txt:",
-            error
-        );
-
-
-        if (
-            elements.promptFileName
-        ) {
-
-            elements.promptFileName.textContent =
-                "Không tìm thấy default-prompt.txt.";
-
-        }
-
-
-        updateStatus(
-            "Chưa có prompt mẫu",
-            "error"
-        );
-
-
-        showToast(
-            "Không đọc được default-prompt.txt."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   12. HANDLE CUSTOM PROMPT FILE
-========================================================= */
-
-async function handlePromptFile(event) {
-
-    const file =
-        event.target.files?.[0];
-
-
-    if (!file) {
-        return;
-    }
-
-
-    try {
-
-        const text =
-            await file.text();
-
-
-        if (!text.trim()) {
-
-            showToast(
-                "File prompt đang trống."
-            );
-
-            return;
-
-        }
-
-
-        elements.promptTemplate.value =
-            text;
-
-
-        state.currentPromptSource =
-            file.name;
-
-
-        if (
-            elements.promptFileName
-        ) {
-
-            elements.promptFileName.textContent =
-                `Nguồn: ${file.name}`;
-
-        }
-
-
-        updateStatus(
-            "Đã tải prompt riêng",
-            "success"
-        );
-
-
-        showToast(
-            "Đã tải prompt mẫu."
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        showToast(
-            "Không đọc được file prompt."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   13. RESET PROMPT
-========================================================= */
-
-async function resetPrompt() {
-
-    if (
-        state.defaultPrompt &&
-        state.defaultPrompt.trim()
-    ) {
-
-        elements.promptTemplate.value =
-            state.defaultPrompt;
-
-
-        state.currentPromptSource =
-            DEFAULT_PROMPT_FILE;
-
-
-        if (
-            elements.promptFileName
-        ) {
-
-            elements.promptFileName.textContent =
-                `Nguồn: ${DEFAULT_PROMPT_FILE}`;
-
-        }
-
-
-        updateStatus(
-            "Đã khôi phục prompt mặc định",
-            "success"
-        );
-
-
-        showToast(
-            "Đã khôi phục prompt mặc định."
-        );
-
-
-        return;
-
-    }
-
-
-    await loadDefaultPrompt();
-
-}
-
-
-/* =========================================================
-   14. GET BASIC INFORMATION
-========================================================= */
-
-function getBasicInformation() {
-
-    return {
-
-        MON_HOC:
-            getValue(
-                elements.subject
-            ),
-
-        LOP:
-            getValue(
-                elements.grade
-            ),
-
-        CHU_DE:
-            getValue(
-                elements.topic
-            ),
-
-        DOI_TUONG:
-            getValue(
-                elements.studentLevel
-            ) ||
-            "Không chỉ định",
-
-        MUC_DICH_SU_DUNG:
-            getValue(
-                elements.purpose
-            ) ||
-            "Luyện tập và củng cố kiến thức",
-
-        YEU_CAU_RIENG:
-            getValue(
-                elements.customRequirements
-            ) ||
-            "Không có yêu cầu riêng."
-
-    };
-
-}
-
-
-/* =========================================================
-   15. GET VALUE
-========================================================= */
-
-function getValue(element) {
-
-    if (!element) {
-        return "";
-    }
-
-    return String(
-        element.value || ""
-    ).trim();
-
-}
-
-
-/* =========================================================
-   16. GET MATRIX VARIABLES
-========================================================= */
-
-function getMatrixVariables() {
-
-    return {
-
-        /*
-           Tổng
-        */
-
-        TONG_SO_CAU:
-            state.totals.total,
-
-
-        /*
-           Trắc nghiệm
-        */
-
-        MCQ_NB:
-            state.matrix.mcq.NB,
-
-        MCQ_TH:
-            state.matrix.mcq.TH,
-
-        MCQ_VD:
-            state.matrix.mcq.VD,
-
-        MCQ_VDC:
-            state.matrix.mcq.VDC,
-
-        MCQ_TONG:
-            state.matrix.mcq.total,
-
-
-        /*
-           Đúng / Sai
-        */
-
-        TF_NB:
-            state.matrix.tf.NB,
-
-        TF_TH:
-            state.matrix.tf.TH,
-
-        TF_VD:
-            state.matrix.tf.VD,
-
-        TF_VDC:
-            state.matrix.tf.VDC,
-
-        TF_TONG:
-            state.matrix.tf.total,
-
-
-        /*
-           Trả lời ngắn
-        */
-
-        SHORT_NB:
-            state.matrix.short.NB,
-
-        SHORT_TH:
-            state.matrix.short.TH,
-
-        SHORT_VD:
-            state.matrix.short.VD,
-
-        SHORT_VDC:
-            state.matrix.short.VDC,
-
-        SHORT_TONG:
-            state.matrix.short.total
-
-    };
-
-}
-
-
-/* =========================================================
-   17. SOURCE VARIABLES
-========================================================= */
-
-function getSourceVariables() {
-
-    return {
-
-        CHE_DO_TAI_LIEU:
-            getSourceModeText(),
-
-        TAI_LIEU_NGUON:
-            getSourceText()
-
-    };
-
-}
-
-
-/* =========================================================
-   18. SOURCE MODE
-========================================================= */
-
-function getSourceModeText() {
-
-    const selected =
-        document.querySelector(
-            'input[name="sourceMode"]:checked'
-        );
-
-
-    if (!selected) {
-
-        return "Không sử dụng tài liệu nguồn.";
-
-    }
-
-
-    const modes = {
-
-        reference:
-            "Tham khảo tài liệu để xác định nội dung và phạm vi kiến thức.",
-
-        strict:
-            "Bám sát tài liệu nguồn, hạn chế mở rộng ngoài tài liệu.",
-
-        only:
-            "Chỉ sử dụng kiến thức có trong tài liệu nguồn."
-
-    };
-
-
-    return (
-        modes[selected.value] ||
-        selected.value
-    );
-
-}
-
-
-/* =========================================================
-   19. SOURCE TEXT
-========================================================= */
-
-function getSourceText() {
-
-    if (
-        !state.sourceFiles.length
-    ) {
-
-        return "Không có tài liệu nguồn.";
-
-    }
-
-
-    const result = [];
-
-
-    state.sourceFiles.forEach(
-        (item, index) => {
-
-            result.push(
-                `--- TÀI LIỆU ${index + 1}: ${item.name} ---`
-            );
-
-
-            if (
-                item.text &&
-                item.text.trim()
-            ) {
-
-                result.push(
-                    item.text.trim()
-                );
-
-            }
-
-            else {
-
-                result.push(
-                    "[Nội dung file này chưa được trích xuất ở chế độ HTML hiện tại.]"
-                );
-
-            }
-
-
-            result.push("");
-
-        }
-    );
-
-
-    return result.join("\n");
-
-}
-
-
-/* =========================================================
-   20. ALL VARIABLES
-========================================================= */
-
-function getAllVariables(
-    includeSources = false
-) {
-
-    const variables = {
-
-        ...getBasicInformation(),
-
-        ...getMatrixVariables()
-
-    };
-
-
-    if (includeSources) {
-
-        Object.assign(
-            variables,
-            getSourceVariables()
-        );
-
-    }
-
-    else {
-
-        /*
-           Nếu không dùng API/tài liệu nâng cao,
-           vẫn thay biến tài liệu để prompt không còn
-           [TAI_LIEU_NGUON].
-        */
-
-        variables.CHE_DO_TAI_LIEU =
-            "Không sử dụng tài liệu nguồn.";
-
-        variables.TAI_LIEU_NGUON =
-            "Không có tài liệu nguồn.";
-
-    }
-
-
-    return variables;
-
-}
-
-
-/* =========================================================
-   21. REPLACE VARIABLES
-========================================================= */
-
-/*
-   Ví dụ:
-
-   [MON_HOC]
-   [LOP]
-   [MUC_DICH_SU_DUNG]
-   [MCQ_NB]
-
-   sẽ được thay bằng dữ liệu thực tế.
-*/
-
-function replaceVariables(
-    template,
-    variables
-) {
-
-    let result =
-        String(template);
-
-
-    Object.keys(variables)
-        .forEach(
-            key => {
-
-                const token =
-                    `[${key}]`;
-
-
-                const value =
-                    variables[key] ?? "";
-
-
-                /*
-                   replaceAll được dùng để
-                   thay tất cả vị trí xuất hiện.
-                */
-
-                result =
-                    result.replaceAll(
-                        token,
-                        String(value)
-                    );
-
-            }
-        );
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   22. FIND UNUSED VARIABLES
-========================================================= */
-
-function findUnusedVariables(
-    prompt
-) {
-
-    const matches =
-        prompt.match(
-            /\[[A-Z0-9_]+\]/g
-        );
-
-
-    if (!matches) {
-
-        return [];
-
-    }
-
-
-    return [
-        ...new Set(matches)
-    ];
-
-}
-
-
-/* =========================================================
-   23. VALIDATE
-========================================================= */
-
-function validateBeforeGenerate() {
-
-    updateMatrix();
-
-
-    const info =
-        getBasicInformation();
-
-
-    if (!info.MON_HOC) {
-
-        showToast(
-            "Vui lòng nhập môn học."
-        );
-
-        elements.subject?.focus();
-
-        return false;
-
-    }
-
-
-    if (!info.LOP) {
-
-        showToast(
-            "Vui lòng nhập lớp."
-        );
-
-        elements.grade?.focus();
-
-        return false;
-
-    }
-
-
-    if (!info.CHU_DE) {
-
-        showToast(
-            "Vui lòng nhập chủ đề / bài học."
-        );
-
-        elements.topic?.focus();
-
-        return false;
-
-    }
-
-
-    if (
-        state.totals.total <= 0
-    ) {
-
-        showToast(
-            "Tổng số câu phải lớn hơn 0."
-        );
-
-        return false;
-
-    }
-
-
-    const template =
-        getValue(
-            elements.promptTemplate
-        );
-
-
-    if (!template) {
-
-        showToast(
-            "Chưa có prompt mẫu."
-        );
-
-        elements.promptTemplate?.focus();
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/* =========================================================
-   24. BUILD PROMPT
-========================================================= */
-
-function buildPrompt(
-    options = {}
-) {
-
-    const includeSources =
-        Boolean(
-            options.includeSources
-        );
-
-
-    const template =
-        getValue(
-            elements.promptTemplate
-        );
-
-
-    const variables =
-        getAllVariables(
-            includeSources
-        );
-
-
-    /*
-       Thay biến
-    */
-
-    const prompt =
-        replaceVariables(
-            template,
-            variables
-        );
-
-
-    return {
-
-        prompt: prompt.trim(),
-
-        variables,
-
-        unusedVariables:
-            findUnusedVariables(
-                prompt
-            )
-
-    };
-
-}
-
-
-/* =========================================================
-   25. GENERATE PROMPT
-========================================================= */
-
-function generatePrompt() {
-
-    if (
-        !validateBeforeGenerate()
-    ) {
-
-        return;
-
-    }
-
-
-    const result =
-        buildPrompt({
-            includeSources: false
-        });
-
-
-    state.lastPrompt =
-        result.prompt;
-
-
-    elements.generatedPrompt.value =
-        result.prompt;
-
-
-    /*
-       Nếu prompt mẫu còn biến chưa được
-       ứng dụng xử lý, cảnh báo nhẹ.
-    */
-
-    if (
-        result.unusedVariables.length
-    ) {
-
-        console.warn(
-            "Biến chưa được thay:",
-            result.unusedVariables
-        );
-
-    }
-
-
-    updateStatus(
-        "Đã tạo prompt",
-        "success"
-    );
-
-
-    showToast(
-        "Đã tạo prompt hoàn chỉnh."
-    );
-
-
-    elements.generatedPrompt
-        ?.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-        });
-
-}
-
-
-/* =========================================================
-   26. SOURCE FILES
-========================================================= */
-
-async function handleSourceFiles(
-    event
-) {
-
-    const files =
-        Array.from(
-            event.target.files || []
-        );
-
-
-    if (!files.length) {
-        return;
-    }
-
-
-    for (
-        const file of files
-    ) {
-
-        const item = {
-
-            file,
-
-            name:
-                file.name,
-
-            size:
-                file.size,
-
-            type:
-                file.type,
-
-            text:
-                null
-
-        };
-
-
-        /*
-           TXT / MD có thể đọc trực tiếp
-        */
-
-        const lowerName =
-            file.name.toLowerCase();
-
-
-        if (
-            lowerName.endsWith(".txt") ||
-            lowerName.endsWith(".md")
-        ) {
-
-            try {
-
-                item.text =
-                    await file.text();
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    error
-                );
-
-            }
-
-        }
-
-
-        state.sourceFiles.push(
-            item
-        );
-
-    }
-
-
-    renderSourceFiles();
-   updateSourceWarning();
-
-
-    /*
-       Reset input để có thể
-       chọn lại cùng file
-    */
-
-    event.target.value = "";
-
-}
-
-
-/* =========================================================
-   27. RENDER SOURCE FILES
-========================================================= */
-
-/* =========================================================
-   27. RENDER SOURCE FILES + WARNING
-========================================================= */
-
-function renderSourceFiles() {
-
-    const container =
-        elements.sourceFileList;
-
-    if (!container) {
-        return;
-    }
-
-
-    /*
-       Không có tài liệu
-    */
-
-    if (!state.sourceFiles.length) {
-
-        container.textContent =
-            "Chưa có tài liệu.";
-
-        updateSourceWarning();
-
-        return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    /*
-       Hiển thị danh sách file
-    */
-
-    state.sourceFiles.forEach(
-        (item, index) => {
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "file-item";
-
-
-            const name =
-                document.createElement(
-                    "span"
-                );
-
-
-            name.className =
-                "file-item-name";
-
-
-            name.textContent =
-                item.name;
-
-
-            const remove =
-                document.createElement(
-                    "button"
-                );
-
-
-            remove.type =
-                "button";
-
-
-            remove.className =
-                "file-item-remove";
-
-
-            remove.textContent =
-                "×";
-
-
-            remove.title =
-                "Xóa tài liệu";
-
-
-            remove.addEventListener(
-                "click",
-                () => {
-
-                    state.sourceFiles.splice(
-                        index,
-                        1
-                    );
-
-
-                    renderSourceFiles();
-                     updateSourceWarning();
-                }
-            );
-
-
-            row.appendChild(
-                name
-            );
-
-            row.appendChild(
-                remove
-            );
-
-            container.appendChild(
-                row
-            );
-
-        }
-    );
-
-
-    /*
-       Cập nhật cảnh báo
-    */
-
-    updateSourceWarning();
-
-}
-/* =========================================================
-   27A. SOURCE LENGTH WARNING
-========================================================= */
-
-function updateSourceWarning() {
-
-    const warning =
-        elements.sourceWarning;
-
-
-    if (!warning) {
-        return;
-    }
-
-
-    /*
-       Tính tổng số ký tự thực sự đã
-       được trích xuất.
-    */
-
-    let totalCharacters = 0;
-
-
-    state.sourceFiles.forEach(
-        item => {
-
-            if (
-                item.text &&
-                item.text.trim()
-            ) {
-
-                totalCharacters +=
-                    item.text.length;
-
-            }
-
-        }
-    );
-
-
-    /*
-       Có file nhưng chưa đọc được text
-       (ví dụ PDF/DOCX hiện tại)
-    */
-
-    const unreadableFiles =
-        state.sourceFiles.filter(
-            item =>
-                !item.text ||
-                !item.text.trim()
-        );
-
-
-    /*
-       Không có nội dung
-    */
-
-    if (
-        totalCharacters === 0 &&
-        !state.sourceFiles.length
-    ) {
-
-        warning.className =
-            "source-warning hidden";
-
-        warning.innerHTML = "";
-
-        return;
-
-    }
-
-
-    /*
-       Định dạng số
-    */
-
-    const formatted =
-        totalCharacters.toLocaleString(
-            "vi-VN"
-        );
-
-
-    /*
-       Trạng thái bình thường
-       <= 30.000 ký tự
-    */
-
-    if (
-        totalCharacters <= 30000
-    ) {
-
-        warning.className =
-            "source-warning normal";
-
-
-        warning.innerHTML =
-            `✓ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
-            `Độ dài tài liệu hiện ở mức phù hợp.`;
-
-    }
-
-
-    /*
-       Cảnh báo
-       30.001 - 60.000
-    */
-
-    else if (
-        totalCharacters <= 60000
-    ) {
-
-        warning.className =
-            "source-warning warning";
-
-
-        warning.innerHTML =
-            `⚠ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
-            `Tài liệu khá dài và có thể làm tăng lượng dữ liệu gửi đến AI. ` +
-            `Nên chỉ giữ nội dung liên quan trực tiếp đến chủ đề.`;
-
-    }
-
-
-    /*
-       Cảnh báo mạnh
-       > 60.000
-    */
-
-    else {
-
-        warning.className =
-            "source-warning danger";
-
-
-        warning.innerHTML =
-            `⚠ Tổng nội dung đã đọc: <strong>${formatted} ký tự</strong>. ` +
-            `Tài liệu khá dài. Nên rút gọn và chỉ giữ phần kiến thức ` +
-            `liên quan trực tiếp đến chủ đề để tiết kiệm hạn mức API.`;
-
-    }
-
-
-    /*
-       Thông báo riêng nếu có PDF/DOCX
-       chưa được trích xuất.
-    */
-
-    if (
-        unreadableFiles.length
-    ) {
-
-        warning.innerHTML +=
-            `<br><small>ℹ ${unreadableFiles.length} file ` +
-            `chưa được trích xuất nội dung trong phiên bản hiện tại ` +
-            `(${unreadableFiles.map(
-                item => item.name
-            ).join(", ")}).</small>`;
-
-    }
-
-}
-
-
-/* =========================================================
-   28. TOGGLE ADVANCED
-========================================================= */
-
-function toggleAdvanced() {
-
-    if (
-        !elements.advancedContent
-    ) {
-
-        return;
-
-    }
-
-
-    const hidden =
-        elements.advancedContent
-            .classList
-            .contains("hidden");
-
-
-    elements.advancedContent
-        .classList
-        .toggle(
-            "hidden",
-            !hidden
-        );
-
-
-    if (
-        elements.advancedToggle
-    ) {
-
-        elements.advancedToggle
-            .classList
-            .toggle(
-                "open",
-                hidden
-            );
-
-
-        elements.advancedToggle
-            .setAttribute(
-                "aria-expanded",
-                String(hidden)
-            );
-
-    }
-
-}
-
-
-/* =========================================================
-   29. CLEAR RESULT
-========================================================= */
-
-function clearResult() {
-
-    if (
-        elements.generatedPrompt
-    ) {
-
-        elements.generatedPrompt.value =
-            "";
-
-    }
-
-
-    state.lastPrompt =
-        "";
-
-
-    showToast(
-        "Đã xóa prompt."
-    );
-
-}
-
-
-/* =========================================================
-   30. COPY TEXT
-========================================================= */
-
-async function copyText(
-    text,
-    successMessage
-) {
-
-    if (
-        !text ||
-        !text.trim()
-    ) {
-
-        showToast(
-            "Không có nội dung để sao chép."
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-        await navigator.clipboard.writeText(
-            text
-        );
-
-
-        showToast(
-            successMessage ||
-            "Đã sao chép."
-        );
-
-    }
-
-    catch (error) {
-
-        /*
-           Fallback
-        */
-
-        const textarea =
-            document.createElement(
-                "textarea"
-            );
-
-
-        textarea.value =
-            text;
-
-
-        textarea.style.position =
-            "fixed";
-
-        textarea.style.left =
-            "-9999px";
-
-
-        document.body.appendChild(
-            textarea
-        );
-
-
-        textarea.select();
-
-
-        try {
-
-            document.execCommand(
-                "copy"
-            );
-
-
-            showToast(
-                successMessage ||
-                "Đã sao chép."
-            );
-
-        }
-
-        catch (copyError) {
-
-            console.error(
-                copyError
-            );
-
-
-            showToast(
-                "Không thể sao chép."
-            );
-
-        }
-
-
-        textarea.remove();
-
-    }
-
-}
-
-
-/* =========================================================
-   31. API VALIDATION
-========================================================= */
-
-function validateAPISettings() {
-
-    const provider =
-        getValue(
-            elements.aiProvider
-        );
-
-
-    const apiKey =
-        getValue(
-            elements.apiKey
-        );
-
-
-    const model =
-        getValue(
-            elements.aiModel
-        );
-
-
-    if (!provider) {
-
-        showToast(
-            "Vui lòng chọn AI Provider."
-        );
-
-        return false;
-
-    }
-
-
-    if (!apiKey) {
-
-        showToast(
-            "Bạn chưa nhập API Key."
-        );
-
-        elements.apiKey?.focus();
-
-        return false;
-
-    }
-
-
-    if (!model) {
-
-        showToast(
-            "Bạn chưa nhập tên model."
-        );
-
-        elements.aiModel?.focus();
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-
-/* =========================================================
-   32. GENERATE WITH AI
-========================================================= */
-
-async function generateWithAI() {
-
-    if (
-        !validateBeforeGenerate()
-    ) {
-
-        return;
-
-    }
-
-
-    if (
-        !validateAPISettings()
-    ) {
-
-        return;
-
-    }
-
-
-    /*
-       Khi dùng AI/API:
-       - Prompt vẫn được tạo từ template.
-       - Đồng thời cho phép đưa tài liệu nguồn vào.
-    */
-
-    const result =
-        buildPrompt({
-            includeSources: true
-        });
-
-
-    const prompt =
-        result.prompt;
-
-
-    const provider =
-        getValue(
-            elements.aiProvider
-        );
-
-
-    const apiKey =
-        getValue(
-            elements.apiKey
-        );
-
-
-    const model =
-        getValue(
-            elements.aiModel
-        );
-
-
-    elements.generateAIButton.disabled =
-        true;
-
-
-    elements.generateAIButton.textContent =
-        "⏳ Đang tạo phiếu...";
-
-
-    try {
-
-        let output;
-
-
-        if (
-            provider === "openai"
-        ) {
-
-            output =
-                await callOpenAI(
-                    prompt,
-                    apiKey,
-                    model
-                );
-
-        }
-
-        else if (
-            provider === "gemini"
-        ) {
-
-            output =
-                await callGemini(
-                    prompt,
-                    apiKey,
-                    model
-                );
-
-        }
-
-        else {
-
-            throw new Error(
-                "AI Provider chưa được hỗ trợ."
-            );
-
-        }
-
-
-        state.aiResult =
-            output;
-
-
-        if (
-            elements.aiResult
-        ) {
-
-            elements.aiResult.textContent =
-                output;
-
-        }
-
-
-        if (
-            elements.aiResultSection
-        ) {
-
-            elements.aiResultSection
-                .classList
-                .remove("hidden");
-
-        }
-
-
-        showToast(
-            "AI đã tạo phiếu bài tập."
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            error
-        );
-
-
-        if (
-            elements.aiResultSection
-        ) {
-
-            elements.aiResultSection
-                .classList
-                .remove("hidden");
-
-        }
-
-
-        if (
-            elements.aiResult
-        ) {
-
-            elements.aiResult.textContent =
-                "Không thể tạo phiếu.\n\n" +
-                error.message;
-
-        }
-
-
-        showToast(
-            "Lỗi khi gọi AI."
-        );
-
-    }
-
-    finally {
-
-        elements.generateAIButton.disabled =
-            false;
-
-
-        elements.generateAIButton.textContent =
-            "✨ TẠO PHIẾU BẰNG AI";
-
-    }
-
-}
-
-
-/* =========================================================
-   33. OPENAI
-========================================================= */
-
-async function callOpenAI(
-    prompt,
-    apiKey,
-    model
-) {
-
-    const response =
-        await fetch(
-            "https://api.openai.com/v1/responses",
-            {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json",
-
-                    "Authorization":
-                        `Bearer ${apiKey}`
-
-                },
-
-                body: JSON.stringify({
-
-                    model: model,
-
-                    input: prompt
-
-                })
-
-            }
-        );
-
-
-    const data =
-        await response.json();
-
-
-    if (!response.ok) {
-
-        throw new Error(
-            data?.error?.message ||
-            `OpenAI API lỗi HTTP ${response.status}`
-        );
-
-    }
-
-
-    if (
-        typeof data.output_text ===
-        "string"
-    ) {
-
-        return data.output_text;
-
-    }
-
-
-    return extractOpenAIText(
-        data
-    );
-
-}
-
-
-/* =========================================================
-   34. EXTRACT OPENAI TEXT
-========================================================= */
-
-function extractOpenAIText(
-    data
-) {
-
-    const result = [];
-
-
-    if (
-        Array.isArray(
-            data.output
-        )
-    ) {
-
-        data.output.forEach(
-            item => {
-
-                if (
-                    Array.isArray(
-                        item.content
-                    )
-                ) {
-
-                    item.content.forEach(
-                        part => {
-
-                            if (
-                                typeof part.text ===
-                                "string"
-                            ) {
-
-                                result.push(
-                                    part.text
-                                );
-
-                            }
-
-                        }
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (
-        result.length
-    ) {
-
-        return result.join(
-            "\n"
-        );
-
-    }
-
-
-    return JSON.stringify(
-        data,
-        null,
-        2
-    );
-
-}
-
-
-/* =========================================================
-   35. GEMINI
-========================================================= */
-
-async function callGemini(
-    prompt,
-    apiKey,
-    model
-) {
-
-    const url =
-        "https://generativelanguage.googleapis.com/" +
-        "v1beta/models/" +
-        encodeURIComponent(model) +
-        ":generateContent?key=" +
-        encodeURIComponent(apiKey);
-
-
-    const response =
-        await fetch(
-            url,
-            {
-
-                method: "POST",
-
-                headers: {
-
-                    "Content-Type":
-                        "application/json"
-
-                },
-
-                body: JSON.stringify({
-
-                    contents: [
-
-                        {
-
-                            parts: [
-
-                                {
-                                    text: prompt
-                                }
-
-                            ]
-
-                        }
-
-                    ]
-
-                })
-
-            }
-        );
-
-
-    const data =
-        await response.json();
-
-
-    if (!response.ok) {
-
-        throw new Error(
-            data?.error?.message ||
-            `Gemini API lỗi HTTP ${response.status}`
-        );
-
-    }
-
-
-    const text =
-        data
-            ?.candidates?.[0]
-            ?.content?.parts
-            ?.map(
-                part =>
-                    part.text || ""
-            )
-            .join("\n");
-
-
-    if (!text) {
-
-        throw new Error(
-            "Gemini không trả về nội dung."
-        );
-
-    }
-
-
-    return text;
-
-}
-
-
-/* =========================================================
-   36. STATUS
-========================================================= */
-
-function updateStatus(
-    text,
-    type = ""
-) {
-
-    if (
-        !elements.promptStatus
-    ) {
-
-        return;
-
-    }
-
-
-    elements.promptStatus.textContent =
-        text;
-
-
-    elements.promptStatus.className =
-        "status-badge";
-
-
-    if (type) {
-
-        elements.promptStatus.classList.add(
-            type
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   37. TOAST
-========================================================= */
-
-let toastTimer = null;
-
-
-function showToast(
-    message
-) {
-
-    if (
-        !elements.toast
-    ) {
-
-        return;
-
-    }
-
-
-    elements.toast.textContent =
-        message;
-
-
-    elements.toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            () => {
-
-                elements.toast.classList.remove(
-                    "show"
-                );
-
-            },
-            2500
-        );
-
-}
-
-
-/* =========================================================
-   38. DEBUG
-========================================================= */
-
-window.getPromptBuilderState =
-    function () {
-
-        updateMatrix();
-
-
-        return {
-
-            basic:
-                getBasicInformation(),
-
-            matrix:
-                structuredClone(
-                    state.matrix
-                ),
-
-            totals:
-                structuredClone(
-                    state.totals
-                ),
-
-            promptSource:
-                state.currentPromptSource,
-
-            sourceFiles:
-                state.sourceFiles.map(
-                    item =>
-                        item.name
-                ),
-
-            lastPrompt:
-                state.lastPrompt
-
-        };
-
-    };
-
-
-/* =========================================================
-   39. TEST VARIABLE SYSTEM
-========================================================= */
-
-/*
-   Mở Console trình duyệt và chạy:
-
-   testPromptVariables()
-
-   để kiểm tra các biến trong default-prompt.txt.
-*/
-
-window.testPromptVariables =
-    function () {
-
-        const template =
-            getValue(
-                elements.promptTemplate
-            );
-
-
-        if (!template) {
-
-            console.log(
-                "Chưa có prompt template."
-            );
-
-            return;
-
-        }
-
-
-        const variables =
-            getAllVariables(
-                false
-            );
-
-
-        const result =
-            replaceVariables(
-                template,
-                variables
-            );
-
-
-        console.log(
-            "===== VARIABLES ====="
-        );
-
-        console.table(
-            variables
-        );
-
-
-        console.log(
-            "===== PROMPT ====="
-        );
-
-        console.log(
-            result
-        );
-
-
-        console.log(
-            "===== BIẾN CHƯA THAY ====="
-        );
-
-        console.log(
-            findUnusedVariables(
-                result
-            )
-        );
-
-
-        return result;
-
-    };
-
-
-/* =========================================================
-   END
-========================================================= */
