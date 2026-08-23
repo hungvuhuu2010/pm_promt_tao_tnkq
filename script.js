@@ -1,13 +1,14 @@
 /* =========================================================
    AI PROMPT BUILDER - script.js
-   Bảo toàn chức năng cũ & Bổ sung Tạo phiếu theo Ma trận
+   Bảo toàn chức năng cũ & Bổ sung Thẻ 2, Thẻ 3
 ========================================================= */
 
 // State quản lý dữ liệu ứng dụng
 const state = {
-    activeTab: 'no-matrix', // 'no-matrix' hoặc 'with-matrix'
+    activeTab: 'no-matrix', // 'no-matrix', 'with-matrix', hoặc 'generate-matrix'
     promptTemplate: '',
     matrixPromptTemplate: '',
+    buildMatrixPromptTemplate: '',
     sourceFiles: [],
     sourceMode: 'reference'
 };
@@ -51,14 +52,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initApp() {
-    // Tải prompt mặc định cho Tab 1
+    // Tải prompt mặc định cho Tab 1, Tab 2, Tab 3
     loadDefaultPrompt();
-    // Tải prompt mặc định cho Tab 2
     loadDefaultMatrixPrompt();
+    loadDefaultBuildMatrixPrompt();
+    
     // Cập nhật ma trận đơn giản (Tab 1)
     updateNoMatrixTotals();
     
-    // Phôi phục tab cũ từ localStorage nếu có
+    // Khôi phục tab cũ từ localStorage nếu có
     const savedTab = localStorage.getItem('activeTab');
     if (savedTab) {
         switchTab(savedTab);
@@ -69,26 +71,31 @@ function switchTab(tabName) {
     state.activeTab = tabName;
     localStorage.setItem('activeTab', tabName);
 
-    const tabNoMatrixBtn = document.getElementById('tabNoMatrixBtn');
-    const tabWithMatrixBtn = document.getElementById('tabWithMatrixBtn');
-    const tabNoMatrix = document.getElementById('tabNoMatrix');
-    const tabWithMatrix = document.getElementById('tabWithMatrix');
+    const btn1 = document.getElementById('tabNoMatrixBtn');
+    const btn2 = document.getElementById('tabWithMatrixBtn');
+    const btn3 = document.getElementById('tabGenerateMatrixBtn');
+
+    const tab1 = document.getElementById('tabNoMatrix');
+    const tab2 = document.getElementById('tabWithMatrix');
+    const tab3 = document.getElementById('tabGenerateMatrix');
+
+    [btn1, btn2, btn3].forEach(b => b?.classList.remove('active'));
+    [tab1, tab2, tab3].forEach(t => t?.classList.remove('active'));
 
     if (tabName === 'no-matrix') {
-        tabNoMatrixBtn.classList.add('active');
-        tabWithMatrixBtn.classList.remove('active');
-        tabNoMatrix.classList.add('active');
-        tabWithMatrix.classList.remove('active');
-    } else {
-        tabWithMatrixBtn.classList.add('active');
-        tabNoMatrixBtn.classList.remove('active');
-        tabWithMatrix.classList.add('active');
-        tabNoMatrix.classList.remove('active');
+        btn1?.classList.add('active');
+        tab1?.classList.add('active');
+    } else if (tabName === 'with-matrix') {
+        btn2?.classList.add('active');
+        tab2?.classList.add('active');
+    } else if (tabName === 'generate-matrix') {
+        btn3?.classList.add('active');
+        tab3?.classList.add('active');
     }
 }
 
 /* =========================================================
-   2. TẢI VÀ XỬ LÝ PROMPT TEMPLATE (TAB 1 & TAB 2)
+   2. TẢI VÀ XỬ LÝ PROMPT TEMPLATE (TAB 1, TAB 2 & TAB 3)
 ========================================================= */
 
 function loadDefaultPrompt() {
@@ -128,6 +135,20 @@ function loadDefaultMatrixPrompt() {
         .catch(err => {
             console.warn('Lỗi tải default_prompt2.txt, dùng template dự phòng:', err);
             state.matrixPromptTemplate = DEFAULT_MATRIX_PROMPT;
+        });
+}
+
+function loadDefaultBuildMatrixPrompt() {
+    fetch('default_prompt3.txt')
+        .then(res => {
+            if (!res.ok) throw new Error('Không tìm thấy default_prompt3.txt');
+            return res.text();
+        })
+        .then(text => {
+            state.buildMatrixPromptTemplate = text;
+        })
+        .catch(err => {
+            console.warn('Lỗi tải default_prompt3.txt:', err);
         });
 }
 
@@ -196,7 +217,6 @@ function generateNoMatrixPrompt() {
                        .replace(/\[DOI_TUONG\]/g, studentLevel)
                        .replace(/\[MUC_DICH_SU_DUNG\]/g, purpose);
 
-    // Thay thế số lượng ma trận
     const getVal = (id) => document.getElementById(id)?.value || '0';
     template = template.replace(/\[MCQ_NB\]/g, getVal('mcqNB'))
                        .replace(/\[MCQ_TH\]/g, getVal('mcqTH'))
@@ -242,7 +262,6 @@ function addMatrixRow(tableId, sectionType) {
     const tr = document.createElement('tr');
 
     if (sectionType === 2) {
-        // Phần 2: Đúng / Sai
         tr.innerHTML = `
             <td><input type="text" class="cell-stt" value="${rowCount}"></td>
             <td><input type="text" class="cell-sub" value="a"></td>
@@ -254,7 +273,6 @@ function addMatrixRow(tableId, sectionType) {
             <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteMatrixRow(this)">✕</button></td>
         `;
     } else {
-        // Các phần 1, 3, 4
         tr.innerHTML = `
             <td><input type="text" class="cell-stt" value="${rowCount}"></td>
             <td><input type="text" class="cell-topic" value=""></td>
@@ -322,6 +340,17 @@ function calculateMatrixTotals() {
    5. TẢI FILE EXCEL MA TRẬN (MAU_MA_TRAN.XLSX)
 ========================================================= */
 
+function downloadTemplateMatrix() {
+    const filePath = "mau_ma_tran.xlsx";
+    const link = document.createElement("a");
+    link.href = filePath;
+    link.download = "mau_ma_tran.xlsx";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast('Đang tải file ma trận mẫu...');
+}
+
 function handleExcelUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -333,25 +362,19 @@ function handleExcelUpload(e) {
         try {
             const data = new Uint8Array(evt.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-
             const numSheets = workbook.SheetNames.length;
 
             if (numSheets === 1) {
-                // TRƯỜNG HỢP 1 SHEET: Đọc vào Phần 1, xóa dữ liệu các phần còn lại
                 parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
-                
-                // Xóa dữ liệu các bảng 2, 3, 4
                 document.querySelectorAll('#tableSection2 tbody, #tableSection3 tbody, #tableSection4 tbody')
                         .forEach(tbody => tbody.innerHTML = '');
             } else {
-                // TRƯỜNG HỢP NHIỀU SHEET (2 - 4 Sheet): Đọc theo từng sheet tương ứng
                 if (numSheets >= 1) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
                 if (numSheets >= 2) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[1]], 'tableSection2', 2);
-                if (numSheets >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection3', 3);
+                if (numSheets >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[2]], 'tableSection3', 3);
                 if (numSheets >= 4) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection4', 4);
             }
 
-            // Cập nhật lại tổng số câu sau khi tải
             calculateMatrixTotals();
             showToast('Đã tải ma trận từ Excel thành công!');
         } catch (err) {
@@ -362,26 +385,22 @@ function handleExcelUpload(e) {
     reader.readAsArrayBuffer(file);
 }
 
-
 function parseExcelSheetToTable(sheet, tableId, sectionType) {
     const table = document.getElementById(tableId);
     if (!table || !sheet) return;
 
     const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
     const tbody = table.querySelector('tbody');
-    tbody.innerHTML = ''; // Xóa hết dòng cũ
+    tbody.innerHTML = '';
 
-    // Lặp qua dữ liệu Excel, bỏ qua dòng tiêu đề
     for (let i = 0; i < jsonData.length; i++) {
         const row = jsonData[i];
         if (!row || row.length === 0) continue;
 
-        // Bỏ qua các hàng tiêu đề ngắn hoặc chứa từ khóa không phải dữ liệu
         const rowStr = row.join(' ').toLowerCase();
         if (rowStr.includes('dạng thức') || rowStr.includes('thành phần năng lực') || rowStr.includes('phần')) continue;
 
         if (sectionType === 2) {
-            // Cấu trúc Phần 2: STT, Ý, Đơn vị kiến thức, NB, TH, VD, Mô tả
             const stt = row[1] || '';
             const sub = row[2] || '';
             const topic = row[3] || row[0] || '';
@@ -405,7 +424,6 @@ function parseExcelSheetToTable(sheet, tableId, sectionType) {
             `;
             tbody.appendChild(tr);
         } else {
-            // Phần 1, 3, 4: STT, Đơn vị kiến thức, NB, TH, VD, Mô tả
             const stt = row[1] || row[0] || '';
             const topic = row[3] || row[2] || '';
             const isNB = row[4] == '1' || row[4] == 'x' || row[4] == 'X';
@@ -431,7 +449,7 @@ function parseExcelSheetToTable(sheet, tableId, sectionType) {
 }
 
 /* =========================================================
-   6. TẠO PROMPT THEO MA TRẬN
+   6. TẠO PROMPT THEO MA TRẬN (TAB 2)
 ========================================================= */
 
 function generateMatrixPrompt() {
@@ -445,7 +463,6 @@ function generateMatrixPrompt() {
                        .replace(/\{LOP\}/g, grade)
                        .replace(/\{CHU_DE\}/g, topic);
 
-    // Render chuỗi văn bản cho 4 bảng
     const formatTableText = (tableId, hasSub) => {
         const rows = document.querySelectorAll(`#${tableId} tbody tr`);
         if (rows.length === 0) return '(Không có câu hỏi)';
@@ -525,7 +542,75 @@ function exportMatrixToExcel() {
 }
 
 /* =========================================================
-   8. EVENT LISTENERS
+   8. THẺ 3: LOGIC TẠO MA TRẬN ĐẶC TẢ (ĐỌC TỪ default_prompt3.txt)
+========================================================= */
+
+function addTopicRow() {
+    const tbody = document.querySelector('#topicWeightTable tbody');
+    if (!tbody) return;
+
+    const rowCount = tbody.children.length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td><input type="text" class="cell-topic-stt" value="${rowCount}"></td>
+        <td><input type="text" class="cell-topic-name" value=""></td>
+        <td><input type="text" class="cell-topic-weight" value=""></td>
+        <td><input type="text" class="cell-topic-note" value=""></td>
+        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+}
+
+function deleteTopicRow(btn) {
+    const tr = btn.closest('tr');
+    if (tr) tr.remove();
+}
+
+function generateBuildMatrixPrompt() {
+    let template = state.buildMatrixPromptTemplate;
+
+    if (!template) {
+        showToast('Đang tải prompt mẫu 3 hoặc không tìm thấy file default_prompt3.txt!');
+        return;
+    }
+
+    const subject = document.getElementById('genMatrixSubject')?.value || '[MON_HOC]';
+    const grade = document.getElementById('genMatrixGrade')?.value || '[LOP]';
+    const time = document.getElementById('genMatrixTime')?.value || '[THOI_GIAN]';
+    const format = document.getElementById('genMatrixFormat')?.value || 'Chuẩn 4 phần';
+
+    const rows = document.querySelectorAll('#topicWeightTable tbody tr');
+    let topicListText = '';
+
+    rows.forEach((r, idx) => {
+        const name = r.querySelector('.cell-topic-name')?.value || '';
+        const weight = r.querySelector('.cell-topic-weight')?.value || '';
+        const note = r.querySelector('.cell-topic-note')?.value || '';
+
+        if (name) {
+            topicListText += `${idx + 1}. Chủ đề: "${name}" - Bố cục điểm/Tỷ lệ: [${weight}] - Ghi chú trọng tâm: ${note}\n`;
+        }
+    });
+
+    if (!topicListText) {
+        topicListText = '(Giáo viên chưa nhập chủ đề chi tiết)';
+    }
+
+    template = template.replace(/\{MON_HOC\}/g, subject)
+                       .replace(/\{LOP\}/g, grade)
+                       .replace(/\{THOI_GIAN\}/g, time)
+                       .replace(/\{CAU_TRUC\}/g, format)
+                       .replace(/\{DANH_SACH_CHU_DE\}/g, topicListText);
+
+    const resultArea = document.getElementById('generatedBuildMatrixPrompt');
+    if (resultArea) {
+        resultArea.value = template;
+        showToast('Đã tạo Prompt yêu cầu AI sinh Ma trận!');
+    }
+}
+
+/* =========================================================
+   9. EVENT LISTENERS
 ========================================================= */
 
 function setupEventListeners() {
@@ -540,7 +625,6 @@ function setupEventListeners() {
         if (res) res.value = '';
     });
 
-    // Inputs thay đổi số lượng ở Tab 1
     const matrixInputs = document.querySelectorAll('.matrix-input, #enableMCQ, #enableTF, #enableShort');
     matrixInputs.forEach(input => input.addEventListener('input', updateNoMatrixTotals));
 
@@ -554,6 +638,20 @@ function setupEventListeners() {
     });
     document.getElementById('clearMatrixResultBtn')?.addEventListener('click', () => {
         const res = document.getElementById('generatedMatrixPrompt');
+        if (res) res.value = '';
+    });
+
+    // Tab 3 Events
+    document.getElementById('generateBuildMatrixPromptBtn')?.addEventListener('click', generateBuildMatrixPrompt);
+    document.getElementById('copyGenMatrixPromptBtn')?.addEventListener('click', () => {
+        const txt = document.getElementById('generatedBuildMatrixPrompt')?.value;
+        if (txt) { 
+            navigator.clipboard.writeText(txt); 
+            showToast('Đã sao chép prompt tạo ma trận!'); 
+        }
+    });
+    document.getElementById('clearGenMatrixResultBtn')?.addEventListener('click', () => {
+        const res = document.getElementById('generatedBuildMatrixPrompt');
         if (res) res.value = '';
     });
 
@@ -571,254 +669,4 @@ function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
-}
-
-
-/* =========================================================
-   BỔ SUNG: TẢI FILE MA TRẬN MẪU (MAU_MA_TRAN.XLSX)
-========================================================= */
-
-function downloadTemplateMatrix() {
-    const filePath = "mau_ma_tran.xlsx";
-    const link = document.createElement("a");
-    link.href = filePath;
-    link.download = "mau_ma_tran.xlsx";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Đang tải file ma trận mẫu...');
-}
-
-/* =========================================================
-   THẺ 3: LOGIC TẠO MA TRẬN ĐẶC TẢ
-========================================================= */
-
-// Bổ sung xử lý chuyển tab trong switchTab
-const oldSwitchTab = switchTab;
-switchTab = function(tabName) {
-    state.activeTab = tabName;
-    localStorage.setItem('activeTab', tabName);
-
-    const btn1 = document.getElementById('tabNoMatrixBtn');
-    const btn2 = document.getElementById('tabWithMatrixBtn');
-    const btn3 = document.getElementById('tabGenerateMatrixBtn');
-
-    const tab1 = document.getElementById('tabNoMatrix');
-    const tab2 = document.getElementById('tabWithMatrix');
-    const tab3 = document.getElementById('tabGenerateMatrix');
-
-    [btn1, btn2, btn3].forEach(b => b?.classList.remove('active'));
-    [tab1, tab2, tab3].forEach(t => t?.classList.remove('active'));
-
-    if (tabName === 'no-matrix') {
-        btn1?.classList.add('active');
-        tab1?.classList.add('active');
-    } else if (tabName === 'with-matrix') {
-        btn2?.classList.add('active');
-        tab2?.classList.add('active');
-    } else if (tabName === 'generate-matrix') {
-        btn3?.classList.add('active');
-        tab3?.classList.add('active');
-    }
-};
-
-// Hàm thêm dòng chủ đề ở Thẻ 3
-function addTopicRow() {
-    const tbody = document.querySelector('#topicWeightTable tbody');
-    if (!tbody) return;
-
-    const rowCount = tbody.children.length + 1;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="text" class="cell-topic-stt" value="${rowCount}"></td>
-        <td><input type="text" class="cell-topic-name" value=""></td>
-        <td><input type="text" class="cell-topic-weight" value=""></td>
-        <td><input type="text" class="cell-topic-note" value=""></td>
-        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
-    `;
-    tbody.appendChild(tr);
-}
-
-// Hàm xóa dòng chủ đề
-function deleteTopicRow(btn) {
-    const tr = btn.closest('tr');
-    if (tr) tr.remove();
-}
-
-// Hàm sinh Prompt yêu cầu AI sinh Ma trận đặc tả
-function generateBuildMatrixPrompt() {
-    const subject = document.getElementById('genMatrixSubject')?.value || '[MON_HOC]';
-    const grade = document.getElementById('genMatrixGrade')?.value || '[LOP]';
-    const time = document.getElementById('genMatrixTime')?.value || '[THOI_GIAN]';
-    const format = document.getElementById('genMatrixFormat')?.value || 'Chuẩn 4 phần';
-
-    // Tổng hợp danh sách các chủ đề & bố cục điểm
-    const rows = document.querySelectorAll('#topicWeightTable tbody tr');
-    let topicListText = '';
-
-    rows.forEach((r, idx) => {
-        const name = r.querySelector('.cell-topic-name')?.value || '';
-        const weight = r.querySelector('.cell-topic-weight')?.value || '';
-        const note = r.querySelector('.cell-topic-note')?.value || '';
-
-        if (name) {
-            topicListText += `${idx + 1}. Chủ đề: "${name}" - Bố cục điểm/Tỷ lệ: [${weight}] - Ghi chú trọng tâm: ${note}\n`;
-        }
-    });
-
-    if (!topicListText) {
-        topicListText = '(Giáo viên chưa nhập chủ đề chi tiết)';
-    }
-
-    const promptText = `VAI TRÒ VÀ NHIỆM VỤ:
-Bạn là chuyên gia thiết kế ma trận đặc tả đề kiểm tra/đánh giá môn học.
-Nhiệm vụ của bạn là xây dựng BẢNG MA TRẬN ĐẶC TẢ CHI TIẾT cho đề kiểm tra dựa trên thông tin yêu cầu của giáo viên dưới đây.
-
-I. THÔNG TIN BÀI KIỂM TRA:
-- Môn học: ${subject}
-- Lớp: ${grade}
-- Thời gian làm bài: ${time}
-- Cấu trúc & Dạng câu hỏi ưu tiên: ${format}
-
-II. PHÂN BỔ CÁC CHỦ ĐỀ & BỐ CỤC ĐIỂM:
-${topicListText}
-
-III. YÊU CẦU AI THỰC HIỆN TỰ ĐỘNG:
-1. Tự chọn dạng câu hỏi (Trắc nghiệm 4 lựa chọn, Đúng/Sai 4 mệnh đề, Trả lời ngắn, Tự luận) và phân bổ số lượng câu cho từng chủ đề sao cho hợp lý, bảo đảm đúng bố cục điểm và tỷ lệ % mà giáo viên đã yêu cầu.
-2. Thiết kế Ma trận chi tiết trình bày dưới dạng 4 PHẦN (tương ứng 4 Sheet trong file Excel mau_ma_tran.xlsx):
-   - Phần 1: Câu trắc nghiệm nhiều phương án lựa chọn (4 lựa chọn, chọn 1 đáp án).
-   - Phần 2: Câu trắc nghiệm Đúng/Sai (Mỗi câu gồm 1 bối cảnh + 4 mệnh đề a, b, c, d).
-   - Phần 3: Câu trắc nghiệm trả lời ngắn (Điền đáp số).
-   - Phần 4: Tự luận / Bài tập mở rộng.
-
-3. Với mỗi câu hỏi/mệnh đề trong ma trận, hãy mô tả đầy đủ các cột:
-   + STT
-   + Tên Đơn vị kiến thức
-   + Mức độ nhận thức (đánh dấu x hoặc 1 vào đúng 1 ô: Nhận biết (NB) / Thông hiểu (TH) / Vận dụng (VD))
-   + Mức độ kiến thức / kĩ năng cần kiểm tra, đánh giá (Mô tả cụ thể yêu cầu học sinh phải làm gì).
-
-IV. ĐỊNH DẠNG ĐẦU RA YÊU CẦU:
-Xuất kết quả dưới dạng BẢNG TEXT / MARKDOWN chuẩn (hoặc cấu trúc Markdown Table) cho từng Phần (Phần 1, Phần 2, Phần 3, Phần 4) để giáo viên có thể dễ dàng copy dán vào Excel hoặc ứng dụng tạo đề.`;
-
-    const resultArea = document.getElementById('generatedBuildMatrixPrompt');
-    if (resultArea) {
-        resultArea.value = promptText;
-        showToast('Đã tạo Prompt yêu cầu AI sinh Ma trận!');
-    }
-}
-
-// Bổ sung Event Listeners cho Thẻ 3 vào setupEventListeners()
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('generateBuildMatrixPromptBtn')?.addEventListener('click', generateBuildMatrixPrompt);
-    
-    document.getElementById('copyGenMatrixPromptBtn')?.addEventListener('click', () => {
-        const txt = document.getElementById('generatedBuildMatrixPrompt')?.value;
-        if (txt) { 
-            navigator.clipboard.writeText(txt); 
-            showToast('Đã sao chép prompt tạo ma trận!'); 
-        }
-    });
-
-    document.getElementById('clearGenMatrixResultBtn')?.addEventListener('click', () => {
-        const res = document.getElementById('generatedBuildMatrixPrompt');
-        if (res) res.value = '';
-    });
-});
-
-/* =========================================================
-   THẺ 3: LOGIC TẠO MA TRẬN ĐẶC TẢ (ĐỌC TỪ default_prompt3.txt)
-========================================================= */
-
-// Khai báo biến lưu template prompt 3
-state.buildMatrixPromptTemplate = '';
-
-// Hàm tải file default_prompt3.txt khi khởi tạo ứng dụng
-function loadDefaultBuildMatrixPrompt() {
-    fetch('default_prompt3.txt')
-        .then(res => {
-            if (!res.ok) throw new Error('Không tìm thấy default_prompt3.txt');
-            return res.text();
-        })
-        .then(text => {
-            state.buildMatrixPromptTemplate = text;
-        })
-        .catch(err => {
-            console.warn('Lỗi tải default_prompt3.txt:', err);
-        });
-}
-
-// Gọi hàm tải prompt 3 trong initApp()
-const originalInitApp = initApp;
-initApp = function() {
-    if (typeof originalInitApp === 'function') originalInitApp();
-    loadDefaultBuildMatrixPrompt();
-};
-
-// Hàm thêm dòng chủ đề ở Thẻ 3
-function addTopicRow() {
-    const tbody = document.querySelector('#topicWeightTable tbody');
-    if (!tbody) return;
-
-    const rowCount = tbody.children.length + 1;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><input type="text" class="cell-topic-stt" value="${rowCount}"></td>
-        <td><input type="text" class="cell-topic-name" value=""></td>
-        <td><input type="text" class="cell-topic-weight" value=""></td>
-        <td><input type="text" class="cell-topic-note" value=""></td>
-        <td class="text-center"><button type="button" class="btn-del-row" onclick="deleteTopicRow(this)">✕</button></td>
-    `;
-    tbody.appendChild(tr);
-}
-
-// Hàm xóa dòng chủ đề
-function deleteTopicRow(btn) {
-    const tr = btn.closest('tr');
-    if (tr) tr.remove();
-}
-
-// Hàm sinh Prompt tạo ma trận đặc tả từ file default_prompt3.txt
-function generateBuildMatrixPrompt() {
-    let template = state.buildMatrixPromptTemplate;
-
-    if (!template) {
-        showToast('Đang tải prompt mẫu 3 hoặc không tìm thấy file default_prompt3.txt!');
-        return;
-    }
-
-    const subject = document.getElementById('genMatrixSubject')?.value || '[MON_HOC]';
-    const grade = document.getElementById('genMatrixGrade')?.value || '[LOP]';
-    const time = document.getElementById('genMatrixTime')?.value || '[THOI_GIAN]';
-    const format = document.getElementById('genMatrixFormat')?.value || 'Chuẩn 4 phần';
-
-    // Tổng hợp danh sách chủ đề & trọng số điểm
-    const rows = document.querySelectorAll('#topicWeightTable tbody tr');
-    let topicListText = '';
-
-    rows.forEach((r, idx) => {
-        const name = r.querySelector('.cell-topic-name')?.value || '';
-        const weight = r.querySelector('.cell-topic-weight')?.value || '';
-        const note = r.querySelector('.cell-topic-note')?.value || '';
-
-        if (name) {
-            topicListText += `${idx + 1}. Chủ đề: "${name}" - Bố cục điểm/Tỷ lệ: [${weight}] - Ghi chú trọng tâm: ${note}\n`;
-        }
-    });
-
-    if (!topicListText) {
-        topicListText = '(Giáo viên chưa nhập chủ đề chi tiết)';
-    }
-
-    // Thay thế các placeholder trong file default_prompt3.txt
-    template = template.replace(/\{MON_HOC\}/g, subject)
-                       .replace(/\{LOP\}/g, grade)
-                       .replace(/\{THOI_GIAN\}/g, time)
-                       .replace(/\{CAU_TRUC\}/g, format)
-                       .replace(/\{DANH_SACH_CHU_DE\}/g, topicListText);
-
-    const resultArea = document.getElementById('generatedBuildMatrixPrompt');
-    if (resultArea) {
-        resultArea.value = template;
-        showToast('Đã tạo Prompt yêu cầu AI sinh Ma trận!');
-    }
 }
