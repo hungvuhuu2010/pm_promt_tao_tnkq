@@ -139,7 +139,7 @@ function loadDefaultMatrixPrompt() {
 }
 
 function loadDefaultBuildMatrixPrompt() {
-    fetch('default_prompt3.txt')
+    fetch('default-prompt3.txt')
         .then(res => {
             if (!res.ok) throw new Error('Không tìm thấy default_prompt3.txt');
             return res.text();
