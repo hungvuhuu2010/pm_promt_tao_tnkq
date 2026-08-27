@@ -43,8 +43,14 @@ Mục đích sử dụng phải được phản ánh thực chất trong thiết
 | Trắc nghiệm 4 lựa chọn |   [MCQ_NB] |   [MCQ_TH] |   [MCQ_VD] |    [MCQ_VDC] |   [MCQ_TONG] |
 | Đúng/Sai               |    [TF_NB] |    [TF_TH] |    [TF_VD] |     [TF_VDC] |    [TF_TONG] |
 | Trả lời ngắn           | [SHORT_NB] | [SHORT_TH] | [SHORT_VD] |  [SHORT_VDC] | [SHORT_TONG] |
+| Điền khuyết            |  [FILL_NB] |  [FILL_TH] |  [FILL_VD] |   [FILL_VDC] |  [FILL_TONG] |
+| Sắp xếp                |  [SORT_NB] |  [SORT_TH] |  [SORT_VD] |   [SORT_VDC] |  [SORT_TONG] |
 
-Phải tạo **đúng số lượng câu ở từng dạng và từng mức độ**. Không tự ý thay đổi ma trận.
+Phải tạo **đúng số lượng câu ở từng dạng và từng mức độ**.
+
+Không tự ý thay đổi, thêm, bớt hoặc chuyển câu giữa các ô ma trận.
+
+Nếu một dạng câu hỏi có giá trị `0` ở tất cả các mức độ thì **không được tạo câu thuộc dạng đó**.
 
 ---
 
@@ -64,7 +70,9 @@ Sử dụng kiến thức và kỹ năng để giải quyết vấn đề hoặc
 
 ### Vận dụng cao
 
-Phân tích, tổng hợp, suy luận nhiều bước, kết nối kiến thức hoặc giải quyết vấn đề phức tạp. Không coi bài tính dài/nhiều phép tính đơn thuần là vận dụng cao.
+Phân tích, tổng hợp, suy luận nhiều bước, kết nối kiến thức hoặc giải quyết vấn đề phức tạp.
+
+Không coi bài tính dài, nhiều phép tính hoặc hình thức câu hỏi phức tạp đơn thuần là vận dụng cao.
 
 ---
 
@@ -88,6 +96,7 @@ Cung cấp:
 * Câu hỏi.
 * A, B, C, D.
 * Đáp án.
+* Mức độ.
 * Giải thích khi cần.
 * Phân tích lỗi của các phương án nhiễu.
 
@@ -100,7 +109,9 @@ Mỗi câu gồm:
 * **Một ngữ cảnh chung**.
 * **Đúng 4 mệnh đề a), b), c), d)** có liên hệ logic với ngữ cảnh.
 
-a), b), c) có thể đóng vai trò khai thác thông tin và chuẩn bị cho d); d) có thể yêu cầu suy luận/vận dụng cao hơn. Tuy nhiên, a), b), c) **không được tiết lộ trực tiếp đáp án của d)**.
+a), b), c) có thể đóng vai trò khai thác thông tin và chuẩn bị cho d); d) có thể yêu cầu suy luận/vận dụng cao hơn.
+
+Tuy nhiên, a), b), c) **không được tiết lộ trực tiếp đáp án của d)**.
 
 Mỗi mệnh đề phải xác định rõ Đúng hoặc Sai.
 
@@ -122,13 +133,144 @@ Học sinh tự tính toán và đưa ra đáp án cuối cùng.
 
 Không yêu cầu trả lời đoạn văn dài.
 
-Mỗi câu phải có đáp án duy nhất hoặc quy ước chấm rõ ràng. Nếu cần làm tròn, phải nêu rõ quy tắc.
+Mỗi câu phải có đáp án duy nhất hoặc quy ước chấm rõ ràng.
+
+Nếu cần làm tròn, phải nêu rõ quy tắc.
 
 Cung cấp:
 
 * Nội dung câu hỏi.
 * Đáp số.
 * Lời giải/cách tính.
+
+**Không cung cấp các phương án lựa chọn cho câu Trả lời ngắn.**
+
+---
+
+## 4.4. Điền khuyết
+
+Điền khuyết là dạng câu hỏi trong đó học sinh phải lựa chọn các phương án thích hợp để điền vào các vị trí còn thiếu trong đề bài.
+
+### Quy định bắt buộc
+
+Mỗi câu Điền khuyết phải có:
+
+* **Một đề bài/ngữ cảnh hoàn chỉnh**.
+* **Ít nhất 4 chỗ trống**.
+* Các chỗ trống phải được đánh dấu rõ ràng theo thứ tự: `[1]`, `[2]`, `[3]`, `[4]`... hoặc ký hiệu tương đương.
+* **Ít nhất 5 phương án lựa chọn** để học sinh chọn điền.
+* Số phương án phải **lớn hơn số chỗ trống ít nhất 1 phương án**, nhằm tạo phương án nhiễu.
+* Các phương án được đánh số rõ ràng: `(1)`, `(2)`, `(3)`, `(4)`, `(5)`...
+* Có thể có nhiều phương án nhiễu hơn nếu phù hợp.
+
+Ví dụ về cấu trúc:
+
+**Câu X. [Đề bài/ngữ cảnh]**
+Yêu cầu sắp xếp các quá trinh (ít nhất 4 quá trình) theo trình tự logic cụ thể
+  [1] ..., 
+  [2] ..., 
+  [3] ..., 
+  [4] ... 
+
+
+**Đáp án:** dạng số chỉ thứ tự đúng, VD: 1423
+
+### Quy tắc thiết kế phương án
+
+Các phương án phải:
+
+* Có khả năng được đặt vào ít nhất một vị trí về mặt ngữ nghĩa hoặc kiến thức.
+* Bao gồm phương án đúng và phương án nhiễu.
+* Phương án nhiễu phải xuất phát từ lỗi hiểu sai, nhầm khái niệm, nhầm công thức, nhầm đơn vị, nhầm thứ tự hoặc lỗi suy luận có thể xảy ra.
+* Không tạo phương án nhiễu quá vô lý.
+* Không để hình thức, độ dài hoặc vị trí phương án làm lộ đáp án.
+
+### Quy tắc chỗ trống
+
+Mỗi chỗ trống phải có **một đáp án đúng xác định** trong tập phương án.
+
+Không tạo chỗ trống có nhiều phương án cùng đúng nếu không có quy ước chấm rõ ràng.
+
+Các chỗ trống phải có vai trò đánh giá kiến thức, không được chỉ dùng để che các từ không quan trọng.
+
+Ít nhất một số chỗ trống phải có giá trị đánh giá phù hợp với mức độ nhận thức được phân bổ trong ma trận.
+
+Không được tạo câu Điền khuyết chỉ bằng cách xóa ngẫu nhiên từ trong một đoạn văn.
+
+### Với dữ liệu số, công thức hoặc biểu thức
+
+Nếu phương án là số, đơn vị hoặc biểu thức:
+
+* Phải bảo đảm quy ước đơn vị rõ ràng.
+* Nếu có làm tròn, phải nêu rõ quy tắc.
+* Các phương án nhiễu phải hợp lý về mặt toán học/khoa học.
+* Không dùng các giá trị sai vô nghĩa chỉ để tăng số lượng phương án.
+
+### Đáp án
+
+Đáp án phải chỉ rõ **phương án được chọn cho từng chỗ trống theo đúng thứ tự**.
+
+Ví dụ:
+
+**Đáp án:** [1] B; [2] E; [3] A; [4] D
+
+Cung cấp giải thích cho cách xác định từng chỗ trống.
+
+---
+
+## 4.5. Sắp xếp
+
+Mỗi câu cung cấp một tập hợp các đối tượng, bước thực hiện, sự kiện, dữ kiện hoặc quy trình bị xáo trộn.
+
+Học sinh phải sắp xếp chúng theo đúng thứ tự được yêu cầu.
+
+### Quy định bắt buộc
+
+Mỗi câu Sắp xếp phải có **ít nhất 4 thành phần** cần sắp xếp.
+
+Các thành phần được đánh dấu rõ ràng bằng:
+
+* A, B, C, D...
+* Hoặc 1, 2, 3, 4...
+
+Khi trình bày đề, thứ tự các thành phần phải được **xáo trộn**, không được trình bày sẵn theo thứ tự đúng.
+
+Có thể yêu cầu sắp xếp:
+
+* Theo trình tự thời gian;
+* Theo quy trình thực hiện;
+* Theo mức độ hoặc thứ tự tăng/giảm;
+* Theo logic giải quyết vấn đề;
+* Theo các bước của một phương pháp hoặc thuật toán.
+
+Các thành phần cần sắp xếp phải đủ rõ để xác định **một thứ tự đúng duy nhất**.
+
+Không tạo nhiều thứ tự cùng đúng nếu không có quy ước chấm tương ứng.
+
+### Quy tắc thiết kế
+
+Các thành phần phải:
+
+* Có quan hệ logic với nhau.
+* Có cùng phạm vi và cùng kiểu thông tin.
+* Không có dấu hiệu hình thức giúp học sinh đoán thứ tự.
+* Không dùng cách diễn đạt làm lộ rõ thành phần đầu tiên hoặc cuối cùng nếu không có cơ sở kiến thức.
+
+Đối với câu Sắp xếp theo quy trình, các bước phải thể hiện đúng quan hệ trước - sau.
+
+Đối với câu Sắp xếp theo thời gian, phải có căn cứ rõ ràng để xác định thứ tự.
+
+Đối với câu Sắp xếp tăng/giảm, tiêu chí sắp xếp phải được nêu rõ.
+
+### Đáp án
+
+Phải cung cấp thứ tự đúng bằng ký hiệu của các thành phần.
+
+Ví dụ:
+
+**Thứ tự đúng:** C → A → D → B
+
+Cung cấp giải thích ngắn gọn về cơ sở xác định thứ tự.
 
 ---
 
@@ -138,7 +280,14 @@ Cung cấp:
 
 Nếu không có yêu cầu riêng, áp dụng các quy định chung của prompt.
 
-Nếu có yêu cầu riêng, ưu tiên thực hiện nhưng **không được vi phạm** số lượng câu, dạng câu hỏi, ma trận, mức độ nhận thức và tính chính xác của nội dung.
+Nếu có yêu cầu riêng, ưu tiên thực hiện nhưng **không được vi phạm**:
+
+* Số lượng câu;
+* Dạng câu hỏi;
+* Ma trận;
+* Mức độ nhận thức;
+* Tính chính xác của nội dung;
+* Các quy định bắt buộc của từng dạng câu hỏi.
 
 ---
 
@@ -181,9 +330,19 @@ Trước khi trả kết quả, phải tự kiểm tra:
 7. Đáp án và lời giải hoàn toàn khớp.
 8. Phương án nhiễu hợp lý.
 9. Câu Đúng/Sai có đúng 4 mệnh đề cùng ngữ cảnh.
-10. Câu trả lời ngắn có đáp số xác định.
-11. Không tự ý thay đổi ma trận hoặc số lượng câu.
-12. Không đưa kiến thức ngoài phạm vi khi giáo viên yêu cầu bám sát tài liệu.
+10. Câu Trả lời ngắn có đáp số xác định và **không có phương án lựa chọn**.
+11. Câu Điền khuyết có **ít nhất 4 chỗ trống**.
+12. Câu Điền khuyết có **ít nhất 5 phương án lựa chọn**.
+13. Số phương án Điền khuyết phải lớn hơn số chỗ trống ít nhất 1 phương án, trừ khi có yêu cầu khác của giáo viên.
+14. Mỗi chỗ trống Điền khuyết có đúng một phương án đúng.
+15. Đáp án Điền khuyết phải chỉ rõ phương án cho từng chỗ trống theo đúng thứ tự.
+16. Câu Sắp xếp có **ít nhất 4 thành phần**.
+17. Các thành phần Sắp xếp phải được xáo trộn trong phần đề.
+18. Câu Sắp xếp có một thứ tự đúng xác định.
+19. Đáp án Sắp xếp phải khớp hoàn toàn với các thành phần đã cho.
+20. Không tự ý thay đổi ma trận hoặc số lượng câu.
+21. Không đưa kiến thức ngoài phạm vi khi giáo viên yêu cầu bám sát tài liệu.
+22. Không để phương án, vị trí, độ dài hoặc hình thức làm lộ đáp án.
 
 **Chỉ xuất phiếu sau khi hoàn thành bước kiểm tra.**
 
@@ -201,6 +360,10 @@ Trước khi trả kết quả, phải tự kiểm tra:
 
 Bảng phải phản ánh đúng các câu thực tế được tạo.
 
+Không được tạo dòng trong bảng nếu câu tương ứng không thực sự tồn tại.
+
+---
+
 ## Bước 2. Nội dung câu hỏi
 
 ### Trắc nghiệm 4 lựa chọn
@@ -216,9 +379,11 @@ C. ...
 D. ...
 
 **Đáp án:** X
+
 **Mức độ:** ...
 
-**Giải thích:** ...
+**Giải thích:** chỉ giải thích nếu câu hỏi mức độ hiểu - vận dụng - vận dụng cao
+
 **Phân tích nhiễu:**
 
 * A: ...
@@ -228,13 +393,18 @@ D. ...
 
 Chỉ cần giải thích và phân tích nhiễu theo yêu cầu của giáo viên; không cần giải thích dài dòng cho câu nhận biết nếu không cần thiết.
 
+---
+
 ### Đúng/Sai
 
 **Câu X. [Ngữ cảnh]**
 
 a) ...
+
 b) ...
+
 c) ...
+
 d) ...
 
 **Đáp án:**
@@ -244,7 +414,9 @@ d) ...
 * c) Đúng/Sai
 * d) Đúng/Sai
 
-**Giải thích:** ...
+**Giải thích:** chỉ giải thích nếu các ý hỏi mức độ hiểu - vận dụng - vận dụng cao
+
+---
 
 ### Trả lời ngắn
 
@@ -252,7 +424,73 @@ d) ...
 
 **Đáp số:** ...
 
+**Mức độ:** ...
+
 **Giải thích:** ...
+
+**Không đưa ra danh sách phương án lựa chọn cho dạng Trả lời ngắn.**
+
+---
+
+### Điền khuyết
+
+**Câu X. [Đề bài/ngữ cảnh]**
+
+[Nội dung] [1] ... [2] ... [3] ... [4] ...
+
+**Các phương án cho sẵn:**
+
+(1) ...
+
+(2) ...
+
+(3) ...
+
+(4) ...
+
+(5) ...
+
+(6) ... nếu cần
+
+**Đáp án:** chuỗi chỉ số phương án theo đúng thứ tự điền, ví dụ 1346 hiểu là (1) ứng với chỗ trống [1], 3 ứng với [2] ...
+
+**Mức độ:** ...
+
+**Giải thích:** ...
+
+Trong đó:
+
+* Có ít nhất 4 chỗ trống.
+* Có ít nhất 5 phương án lựa chọn.
+* Có ít nhất 1 phương án nhiễu.
+* Mỗi chỗ trống có đúng một phương án đúng.
+* Các phương án nhiễu phải hợp lý và có liên quan đến kiến thức đang đánh giá.
+
+---
+
+### Sắp xếp
+
+**Câu X. [Yêu cầu sắp xếp]**
+
+Các thành phần:
+
+[1]. ...
+
+[2] ...
+
+[3] ...
+
+[4] ...
+
+[5] ... nếu cần
+
+**Thứ tự đúng:** ...
+
+**Mức độ:** ...
+
+**Giải thích:** ...
+
+Trong đó phải có ít nhất 4 thành phần và các thành phần trong đề phải được trình bày ở thứ tự xáo trộn.
 
 ---
 
@@ -265,6 +503,32 @@ Hệ thống có thể cung cấp:
 * Yêu cầu riêng.
 * Tài liệu nguồn.
 
+Các biến hệ thống sử dụng chính xác theo tên sau:
+
+* `[MON_HOC]`
+* `[LOP]`
+* `[CHU_DE]`
+* `[DOI_TUONG]`
+* `[MUC_DICH_SU_DUNG]`
+* `[YEU_CAU_RIENG]`
+* `[CHE_DO_TAI_LIEU]`
+* `[TAI_LIEU_NGUON]`
+* `[TONG_SO_CAU]`
+
+Các biến ma trận:
+
+* `[MCQ_NB]`, `[MCQ_TH]`, `[MCQ_VD]`, `[MCQ_VDC]`, `[MCQ_TONG]`
+* `[TF_NB]`, `[TF_TH]`, `[TF_VD]`, `[TF_VDC]`, `[TF_TONG]`
+* `[SHORT_NB]`, `[SHORT_TH]`, `[SHORT_VD]`, `[SHORT_VDC]`, `[SHORT_TONG]`
+* `[FILL_NB]`, `[FILL_TH]`, `[FILL_VD]`, `[FILL_VDC]`, `[FILL_TONG]`
+* `[SORT_NB]`, `[SORT_TH]`, `[SORT_VD]`, `[SORT_VDC]`, `[SORT_TONG]`
+
+Không được tự ý đổi tên, viết khác hoặc tạo biến thay thế cho các biến trên.
+
 Không yêu cầu giáo viên dán lại tài liệu nguồn nếu hệ thống đã truyền nội dung tài liệu.
 
 Nếu `[TAI_LIEU_NGUON]` có nội dung, phải coi đó là tài liệu nguồn chính thức và áp dụng các quy định tại mục 6.
+
+Nếu một biến ma trận có giá trị `0`, không tạo câu thuộc ô ma trận đó.
+
+Trước khi xuất kết quả, phải đối chiếu số lượng câu thực tế với toàn bộ các biến ma trận.
