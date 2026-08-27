@@ -157,85 +157,149 @@ function loadDefaultBuildMatrixPrompt() {
 ========================================================= */
 
 function updateNoMatrixTotals() {
-    const getVal = (id) => parseInt(document.getElementById(id)?.value || 0, 10);
-    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const questionTypes = [
+        { key: 'mcq', enable: 'enableMCQ' },
+        { key: 'tf', enable: 'enableTF' },
+        { key: 'short', enable: 'enableShort' },
+        { key: 'fill', enable: 'enableFill' },
+        { key: 'sort', enable: 'enableSort' }
+    ];
 
-    const enableMCQ = document.getElementById('enableMCQ')?.checked ?? true;
-    const enableTF = document.getElementById('enableTF')?.checked ?? true;
-    const enableShort = document.getElementById('enableShort')?.checked ?? true;
+    const levels = ['NB', 'TH', 'VD', 'VDC'];
 
-    const mcqNB = enableMCQ ? getVal('mcqNB') : 0;
-    const mcqTH = enableMCQ ? getVal('mcqTH') : 0;
-    const mcqVD = enableMCQ ? getVal('mcqVD') : 0;
-    const mcqVDC = enableMCQ ? getVal('mcqVDC') : 0;
-    const mcqTotal = mcqNB + mcqTH + mcqVD + mcqVDC;
-    setTxt('mcqTotal', mcqTotal);
+    const getVal = (id) =>
+        Math.max(0, parseInt(document.getElementById(id)?.value || 0, 10));
 
-    const tfNB = enableTF ? getVal('tfNB') : 0;
-    const tfTH = enableTF ? getVal('tfTH') : 0;
-    const tfVD = enableTF ? getVal('tfVD') : 0;
-    const tfVDC = enableTF ? getVal('tfVDC') : 0;
-    const tfTotal = tfNB + tfTH + tfVD + tfVDC;
-    setTxt('tfTotal', tfTotal);
+    const setTxt = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    };
 
-    const shortNB = enableShort ? getVal('shortNB') : 0;
-    const shortTH = enableShort ? getVal('shortTH') : 0;
-    const shortVD = enableShort ? getVal('shortVD') : 0;
-    const shortVDC = enableShort ? getVal('shortVDC') : 0;
-    const shortTotal = shortNB + shortTH + shortVD + shortVDC;
-    setTxt('shortTotal', shortTotal);
+    const totals = {};
 
-    const grandNB = mcqNB + tfNB + shortNB;
-    const grandTH = mcqTH + tfTH + shortTH;
-    const grandVD = mcqVD + tfVD + shortVD;
-    const grandVDC = mcqVDC + tfVDC + shortVDC;
-    const grandTotal = mcqTotal + tfTotal + shortTotal;
+    questionTypes.forEach(type => {
+        const enabled =
+            document.getElementById(type.enable)?.checked ?? true;
 
-    setTxt('grandNB', grandNB);
-    setTxt('grandTH', grandTH);
-    setTxt('grandVD', grandVD);
-    setTxt('grandVDC', grandVDC);
-    setTxt('grandTotal', grandTotal);
+        totals[type.key] = {};
+
+        levels.forEach(level => {
+            totals[type.key][level] = enabled
+                ? getVal(`${type.key}${level}`)
+                : 0;
+        });
+
+        totals[type.key].total = levels.reduce(
+            (sum, level) => sum + totals[type.key][level],
+            0
+        );
+
+        setTxt(
+            `${type.key}Total`,
+            totals[type.key].total
+        );
+    });
+
+    const grand = {
+        NB: 0,
+        TH: 0,
+        VD: 0,
+        VDC: 0,
+        total: 0
+    };
+
+    questionTypes.forEach(type => {
+        levels.forEach(level => {
+            grand[level] += totals[type.key][level];
+        });
+
+        grand.total += totals[type.key].total;
+    });
+
+    levels.forEach(level => {
+        setTxt(`grand${level}`, grand[level]);
+    });
+
+    setTxt('grandTotal', grand.total);
 }
 
 function generateNoMatrixPrompt() {
-    let template = document.getElementById('promptTemplate')?.value || state.promptTemplate;
+    let template =
+        document.getElementById('promptTemplate')?.value ||
+        state.promptTemplate;
+
     if (!template) {
         showToast('Vui lòng nhập hoặc tải Prompt mẫu!');
         return;
     }
 
-    const subject = document.getElementById('subject')?.value || '[MON_HOC]';
-    const grade = document.getElementById('grade')?.value || '[LOP]';
-    const topic = document.getElementById('topic')?.value || '[CHU_DE]';
-    const studentLevel = document.getElementById('studentLevel')?.value || '[DOI_TUONG]';
-    const purpose = document.getElementById('purpose')?.value || '[MUC_DICH_SU_DUNG]';
+    const subject =
+        document.getElementById('subject')?.value ||
+        '[MON_HOC]';
 
-    template = template.replace(/\[MON_HOC\]/g, subject)
-                       .replace(/\[LOP\]/g, grade)
-                       .replace(/\[CHU_DE\]/g, topic)
-                       .replace(/\[DOI_TUONG\]/g, studentLevel)
-                       .replace(/\[MUC_DICH_SU_DUNG\]/g, purpose);
+    const grade =
+        document.getElementById('grade')?.value ||
+        '[LOP]';
 
-    const getVal = (id) => document.getElementById(id)?.value || '0';
-    template = template.replace(/\[MCQ_NB\]/g, getVal('mcqNB'))
-                       .replace(/\[MCQ_TH\]/g, getVal('mcqTH'))
-                       .replace(/\[MCQ_VD\]/g, getVal('mcqVD'))
-                       .replace(/\[MCQ_VDC\]/g, getVal('mcqVDC'))
-                       .replace(/\[MCQ_TONG\]/g, document.getElementById('mcqTotal')?.textContent || '0')
-                       .replace(/\[TF_NB\]/g, getVal('tfNB'))
-                       .replace(/\[TF_TH\]/g, getVal('tfTH'))
-                       .replace(/\[TF_VD\]/g, getVal('tfVD'))
-                       .replace(/\[TF_VDC\]/g, getVal('tfVDC'))
-                       .replace(/\[TF_TONG\]/g, document.getElementById('tfTotal')?.textContent || '0')
-                       .replace(/\[SHORT_NB\]/g, getVal('shortNB'))
-                       .replace(/\[SHORT_TH\]/g, getVal('shortTH'))
-                       .replace(/\[SHORT_VD\]/g, getVal('shortVD'))
-                       .replace(/\[SHORT_VDC\]/g, getVal('shortVDC'))
-                       .replace(/\[SHORT_TONG\]/g, document.getElementById('shortTotal')?.textContent || '0')
-                       .replace(/\[TONG_SO_CAU\]/g, document.getElementById('grandTotal')?.textContent || '0');
+    const topic =
+        document.getElementById('topic')?.value ||
+        '[CHU_DE]';
 
-    const resultArea = document.getElementById('generatedPrompt');
+    const studentLevel =
+        document.getElementById('studentLevel')?.value ||
+        '[DOI_TUONG]';
+
+    const purpose =
+        document.getElementById('purpose')?.value ||
+        '[MUC_DICH_SU_DUNG]';
+
+    // Thông tin chung
+    template = template
+        .replace(/\[MON_HOC\]/g, subject)
+        .replace(/\[LOP\]/g, grade)
+        .replace(/\[CHU_DE\]/g, topic)
+        .replace(/\[DOI_TUONG\]/g, studentLevel)
+        .replace(/\[MUC_DICH_SU_DUNG\]/g, purpose);
+
+    const getVal = (id) =>
+        document.getElementById(id)?.value || '0';
+
+    const getTotal = (id) =>
+        document.getElementById(id)?.textContent || '0';
+
+    // Các dạng câu hỏi
+    const types = [
+        'MCQ',
+        'TF',
+        'SHORT',
+        'FILL',
+        'SORT'
+    ];
+
+    // Thay thế toàn bộ placeholder theo dạng:
+    // [MCQ_NB], [MCQ_TH]...
+    types.forEach(type => {
+        ['NB', 'TH', 'VD', 'VDC'].forEach(level => {
+            template = template.replace(
+                new RegExp(`\\[${type}_${level}\\]`, 'g'),
+                getVal(`${type.toLowerCase()}${level}`)
+            );
+        });
+
+        template = template.replace(
+            new RegExp(`\\[${type}_TONG\\]`, 'g'),
+            getTotal(`${type.toLowerCase()}Total`)
+        );
+    });
+
+    template = template.replace(
+        /\[TONG_SO_CAU\]/g,
+        getTotal('grandTotal')
+    );
+
+    const resultArea =
+        document.getElementById('generatedPrompt');
+
     if (resultArea) {
         resultArea.value = template;
         showToast('Đã tạo Prompt thành công!');
@@ -624,7 +688,9 @@ function setupEventListeners() {
         if (res) res.value = '';
     });
 
-    const matrixInputs = document.querySelectorAll('.matrix-input, #enableMCQ, #enableTF, #enableShort');
+	const matrixInputs = document.querySelectorAll(
+		'.matrix-input, #enableMCQ, #enableTF, #enableShort, #enableFill, #enableSort'
+	);
     matrixInputs.forEach(input => input.addEventListener('input', updateNoMatrixTotals));
 
     // Tab 2 Events
