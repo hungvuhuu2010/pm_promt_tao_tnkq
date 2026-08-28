@@ -358,7 +358,7 @@
                     <div class="section-number">3</div>
                     <div>
                         <h2>Prompt mẫu</h2>
-                        <p>Tự động đọc từ default-prompt.txt hoặc tải prompt riêng</p>
+                        <p>Tự động đọc từ default_prompt.txt hoặc tải prompt riêng</p>
                     </div>
                 </div>
 
@@ -940,10 +940,10 @@
 
 <script>
 function downloadDefaultPrompt() {
-    const filePath = "default-prompt.txt";
+    const filePath = "default_prompt.txt";
     const link = document.createElement("a");
     link.href = filePath;
-    link.download = "default-prompt.txt";
+    link.download = "default_prompt.txt";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
