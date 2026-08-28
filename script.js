@@ -105,19 +105,19 @@ function loadDefaultPrompt() {
 
     if (statusBadge) statusBadge.className = 'status-badge loading', statusBadge.textContent = 'Đang tải prompt...';
 
-    fetch('default-prompt.txt')
+    fetch('default_prompt.txt')
         .then(res => {
-            if (!res.ok) throw new Error('Không tìm thấy default-prompt.txt');
+            if (!res.ok) throw new Error('Không tìm thấy default_prompt.txt');
             return res.text();
         })
         .then(text => {
             state.promptTemplate = text;
             if (textarea) textarea.value = text;
             if (statusBadge) statusBadge.className = 'status-badge success', statusBadge.textContent = 'Sẵn sàng';
-            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: default-prompt.txt (mặc định)';
+            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: default_prompt.txt (mặc định)';
         })
         .catch(err => {
-            console.warn('Lỗi tải default-prompt.txt:', err);
+            console.warn('Lỗi tải default_prompt.txt:', err);
             if (statusBadge) statusBadge.className = 'status-badge error', statusBadge.textContent = 'Chưa có prompt';
             if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: Không tìm thấy file mẫu';
         });
