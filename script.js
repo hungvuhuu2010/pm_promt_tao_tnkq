@@ -572,72 +572,50 @@ function generateNoMatrixPrompt() {
         return;
     }
 
-    const subject =
-        document.getElementById('subject')?.value ||
-        '[MON_HOC]';
+    // Lấy giá trị nhập vào, nếu trống thì giữ nguyên tên nhãn placeholder
+    const subject = document.getElementById('subject')?.value.trim() || '[MON_HOC]';
+    const grade = document.getElementById('grade')?.value.trim() || '[LOP]';
+    const topic = document.getElementById('topic')?.value.trim() || '[CHU_DE]';
+    const studentLevel = document.getElementById('studentLevel')?.value.trim() || '[DOI_TUONG]';
+    const purpose = document.getElementById('purpose')?.value.trim() || '[MUC_DICH_SU_DUNG]';
 
-    const grade =
-        document.getElementById('grade')?.value ||
-        '[LOP]';
+    // Hàm thay thế an toàn chống lỗi mất chuỗi khi chứa ký tự đặc biệt
+    const safeReplace = (str, pattern, replacement) => {
+        return str.replace(pattern, () => replacement);
+    };
 
-    const topic =
-        document.getElementById('topic')?.value ||
-        '[CHU_DE]';
+    // Thay thế Thông tin chung
+    template = safeReplace(template, /\[MON_HOC\]/g, subject);
+    template = safeReplace(template, /\[LOP\]/g, grade);
+    template = safeReplace(template, /\[CHU_DE\]/g, topic);
+    template = safeReplace(template, /\[DOI_TUONG\]/g, studentLevel);
+    template = safeReplace(template, /\[MUC_DICH_SU_DUNG\]/g, purpose);
 
-    const studentLevel =
-        document.getElementById('studentLevel')?.value ||
-        '[DOI_TUONG]';
-
-    const purpose =
-        document.getElementById('purpose')?.value ||
-        '[MUC_DICH_SU_DUNG]';
-
-    // Thông tin chung
-    template = template
-        .replace(/\[MON_HOC\]/g, subject)
-        .replace(/\[LOP\]/g, grade)
-        .replace(/\[CHU_DE\]/g, topic)
-        .replace(/\[DOI_TUONG\]/g, studentLevel)
-        .replace(/\[MUC_DICH_SU_DUNG\]/g, purpose);
-
-    const getVal = (id) =>
-        document.getElementById(id)?.value || '0';
-
-    const getTotal = (id) =>
-        document.getElementById(id)?.textContent || '0';
+    const getVal = (id) => document.getElementById(id)?.value || '0';
+    const getTotal = (id) => document.getElementById(id)?.textContent || '0';
 
     // Các dạng câu hỏi
-    const types = [
-        'MCQ',
-        'TF',
-        'SHORT',
-        'FILL',
-        'SORT'
-    ];
+    const types = ['MCQ', 'TF', 'SHORT', 'FILL', 'SORT'];
 
-    // Thay thế toàn bộ placeholder theo dạng:
-    // [MCQ_NB], [MCQ_TH]...
+    // Thay thế các biến ma trận [MCQ_NB], [MCQ_TH]...
     types.forEach(type => {
         ['NB', 'TH', 'VD', 'VDC'].forEach(level => {
-            template = template.replace(
-                new RegExp(`\\[${type}_${level}\\]`, 'g'),
-                getVal(`${type.toLowerCase()}${level}`)
-            );
+            const val = getVal(`${type.toLowerCase()}${level}`);
+            template = safeReplace(template, new RegExp(`\\[${type}_${level}\\]`, 'g'), val);
         });
 
-        template = template.replace(
-            new RegExp(`\\[${type}_TONG\\]`, 'g'),
-            getTotal(`${type.toLowerCase()}Total`)
-        );
+        const totalVal = getTotal(`${type.toLowerCase()}Total`);
+        template = safeReplace(template, new RegExp(`\\[${type}_TONG\\]`, 'g'), totalVal);
     });
 
-    template = template.replace(
-        /\[TONG_SO_CAU\]/g,
-        getTotal('grandTotal')
-    );
+    // Thay thế tổng số câu
+    template = safeReplace(template, /\[TONG_SO_CAU\]/g, getTotal('grandTotal'));
 
-    const resultArea =
-        document.getElementById('generatedPrompt');
+    // Xử lý Yêu cầu riêng & Tài liệu nguồn nếu có
+    const customReq = document.getElementById('customRequirements')?.value.trim() || 'Không có yêu cầu riêng.';
+    template = safeReplace(template, /\[YEU_CAU_RIENG\]/g, customReq);
+
+    const resultArea = document.getElementById('generatedPrompt');
 
     if (resultArea) {
         resultArea.value = template;
