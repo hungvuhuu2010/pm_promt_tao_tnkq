@@ -3,6 +3,7 @@
    Bảo toàn chức năng cũ & Bổ sung Thẻ 2, Thẻ 3
 ========================================================= */
 
+
 // State quản lý dữ liệu ứng dụng
 const state = {
     activeTab: 'no-matrix', // 'no-matrix', 'with-matrix', hoặc 'generate-matrix'
@@ -45,6 +46,21 @@ III. YÊU CẦU:
 /* =========================================================
    LƯU / IMPORT CẤU HÌNH THẺ 1
    ========================================================= */
+function initApp() {
+    // 1. Tải sẵn các prompt mặc định vào biến toàn cục (chưa đổ ra UI ngay)
+    loadDefaultPrompt();
+    loadDefaultMatrixPrompt();
+    loadDefaultBuildMatrixPrompt();
+    
+    // 2. Cập nhật tính toán tổng số câu ma trận (Tab 1)
+    updateNoMatrixTotals();
+    
+    // 3. Khôi phục tab cũ người dùng đang mở từ localStorage (nếu có)
+    const savedTab = localStorage.getItem('activeTab');
+    if (savedTab) {
+        switchTab(savedTab);
+    }
+}
 
 function getTab1Config() {
     return {
@@ -437,29 +453,40 @@ function switchTab(tabName) {
    2. TẢI VÀ XỬ LÝ PROMPT TEMPLATE (TAB 1, TAB 2 & TAB 3)
 ========================================================= */
 
+// 1. Tải sẵn file prompt mặc định vào biến toàn cục, KHÔNG đẩy ra UI ngay
 function loadDefaultPrompt() {
-    const statusBadge = document.getElementById('promptStatus');
-    const fileNameDiv = document.getElementById('promptFileName');
-    const textarea = document.getElementById('promptTemplate');
-
-    if (statusBadge) statusBadge.className = 'status-badge loading', statusBadge.textContent = 'Đang tải prompt...';
-
     fetch('default_prompt.txt')
         .then(res => {
             if (!res.ok) throw new Error('Không tìm thấy default_prompt.txt');
             return res.text();
         })
         .then(text => {
-            state.promptTemplate = text;
-            if (textarea) textarea.value = text;
-            if (statusBadge) statusBadge.className = 'status-badge success', statusBadge.textContent = 'Sẵn sàng';
-            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: default_prompt.txt (mặc định)';
+            // Lưu cố định vào biến toàn cục
+            state.defaultPrompt = text;
+            
+            const statusBadge = document.getElementById('promptStatus');
+            if (statusBadge) {
+                statusBadge.className = 'status-badge success';
+                statusBadge.textContent = 'Mẫu đã sẵn sàng';
+            }
         })
         .catch(err => {
             console.warn('Lỗi tải default_prompt.txt:', err);
-            if (statusBadge) statusBadge.className = 'status-badge error', statusBadge.textContent = 'Chưa có prompt';
-            if (fileNameDiv) fileNameDiv.textContent = 'Nguồn: Không tìm thấy file mẫu';
         });
+}
+
+// 2. Hàm chỉ đổ prompt mẫu ra UI khi người dùng chủ động bấm nút
+function applyDefaultPromptToUI() {
+    if (!state.defaultPrompt) {
+        showToast('Prompt mặc định chưa tải xong, vui lòng đợi giây lát!');
+        return;
+    }
+    
+    const textarea = document.getElementById('promptTemplate');
+    if (textarea) {
+        textarea.value = state.defaultPrompt;
+        showToast('Đã nạp Prompt mặc định!');
+    }
 }
 
 function loadDefaultMatrixPrompt() {
@@ -562,61 +589,50 @@ function updateNoMatrixTotals() {
     setTxt('grandTotal', grand.total);
 }
 
+// 3. Hàm tạo prompt chính (Luôn lấy từ biến toàn cục state.defaultPrompt)
 function generateNoMatrixPrompt() {
-    let template =
-        document.getElementById('promptTemplate')?.value ||
-        state.promptTemplate;
+    // Ưu tiên lấy từ khung textarea nếu người dùng có sửa tay, nếu trống thì dùng biến toàn cục gốc
+    let template = document.getElementById('promptTemplate')?.value.trim() || state.defaultPrompt;
 
     if (!template) {
-        showToast('Vui lòng nhập hoặc tải Prompt mẫu!');
+        showToast('Vui lòng bấm "Dùng Prompt mặc định" hoặc nhập Prompt mẫu!');
         return;
     }
 
-    // Lấy giá trị nhập vào, nếu trống thì giữ nguyên tên nhãn placeholder
     const subject = document.getElementById('subject')?.value.trim() || '[MON_HOC]';
     const grade = document.getElementById('grade')?.value.trim() || '[LOP]';
     const topic = document.getElementById('topic')?.value.trim() || '[CHU_DE]';
     const studentLevel = document.getElementById('studentLevel')?.value.trim() || '[DOI_TUONG]';
     const purpose = document.getElementById('purpose')?.value.trim() || '[MUC_DICH_SU_DUNG]';
 
-    // Hàm thay thế an toàn chống lỗi mất chuỗi khi chứa ký tự đặc biệt
-    const safeReplace = (str, pattern, replacement) => {
-        return str.replace(pattern, () => replacement);
-    };
+    // Thay thế an toàn tuyệt đối chống cắt chuỗi do ký tự $
+    const safeReplace = (str, pattern, replacement) => str.replace(pattern, () => replacement);
 
-    // Thay thế Thông tin chung
     template = safeReplace(template, /\[MON_HOC\]/g, subject);
     template = safeReplace(template, /\[LOP\]/g, grade);
     template = safeReplace(template, /\[CHU_DE\]/g, topic);
     template = safeReplace(template, /\[DOI_TUONG\]/g, studentLevel);
     template = safeReplace(template, /\[MUC_DICH_SU_DUNG\]/g, purpose);
 
+    // Xử lý ma trận & số lượng câu...
     const getVal = (id) => document.getElementById(id)?.value || '0';
     const getTotal = (id) => document.getElementById(id)?.textContent || '0';
-
-    // Các dạng câu hỏi
     const types = ['MCQ', 'TF', 'SHORT', 'FILL', 'SORT'];
 
-    // Thay thế các biến ma trận [MCQ_NB], [MCQ_TH]...
     types.forEach(type => {
         ['NB', 'TH', 'VD', 'VDC'].forEach(level => {
             const val = getVal(`${type.toLowerCase()}${level}`);
             template = safeReplace(template, new RegExp(`\\[${type}_${level}\\]`, 'g'), val);
         });
-
-        const totalVal = getTotal(`${type.toLowerCase()}Total`);
-        template = safeReplace(template, new RegExp(`\\[${type}_TONG\\]`, 'g'), totalVal);
+        template = safeReplace(template, new RegExp(`\\[${type}_TONG\\]`, 'g'), getTotal(`${type.toLowerCase()}Total`));
     });
 
-    // Thay thế tổng số câu
     template = safeReplace(template, /\[TONG_SO_CAU\]/g, getTotal('grandTotal'));
 
-    // Xử lý Yêu cầu riêng & Tài liệu nguồn nếu có
     const customReq = document.getElementById('customRequirements')?.value.trim() || 'Không có yêu cầu riêng.';
     template = safeReplace(template, /\[YEU_CAU_RIENG\]/g, customReq);
 
     const resultArea = document.getElementById('generatedPrompt');
-
     if (resultArea) {
         resultArea.value = template;
         showToast('Đã tạo Prompt thành công!');
@@ -994,6 +1010,10 @@ function generateBuildMatrixPrompt() {
 ========================================================= */
 
 function setupEventListeners() {
+
+    // Gắn sự kiện bấm nút mới hiển thị prompt mẫu
+    document.getElementById('resetPromptBtn')?.addEventListener('click', applyDefaultPromptToUI);
+    
     // Tab 1 Events
     document.getElementById('generatePromptBtn')?.addEventListener('click', generateNoMatrixPrompt);
     document.getElementById('copyPromptBtn')?.addEventListener('click', () => {
