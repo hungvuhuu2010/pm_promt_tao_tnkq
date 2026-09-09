@@ -485,6 +485,11 @@ function applyDefaultPromptToUI() {
     const textarea = document.getElementById('promptTemplate');
     if (textarea) {
         textarea.value = state.defaultPrompt;
+		const promptFileName = document.getElementById('promptFileName');
+
+            if (promptFileName) {
+                promptFileName.textContent = `Nguồn default_prompt.txt`;
+            }
         showToast('Đã nạp Prompt mặc định!');
     }
 }
