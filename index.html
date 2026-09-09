@@ -117,7 +117,7 @@
         type="file"
         id="importTab1ConfigFile"
         accept=".txt"
-		onchange="importTab1Config(event)"
+	onchange="importTab1Config(event)"
         hidden
     >
 </div>
@@ -386,7 +386,7 @@
                     <button type="button" id="downloadDefaultPromptBtn" class="button error" onclick="downloadDefaultPrompt()">⬇ Tải prompt mẫu</button>
                 </div>
 
-                <textarea id="promptTemplate" class="prompt-template" rows="5" spellcheck="false" placeholder="Đang tải prompt mẫu..."></textarea>
+                <textarea id="promptTemplate" class="prompt-template" rows="5" spellcheck="false" autocomplete="off" placeholder="Đang tải prompt mẫu..."></textarea>
                 
                 <div id="promptFileName" class="file-info">Nguồn: đang tải...</div>
             </section>
