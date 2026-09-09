@@ -639,6 +639,62 @@ function generateNoMatrixPrompt() {
     }
 }
 
+function loadCustomPrompt(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    const fileName = file.name.toLowerCase();
+
+    if (!fileName.endsWith('.txt') && !fileName.endsWith('.md')) {
+        showToast('Vui lòng chọn file .txt hoặc .md!');
+        event.target.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const content = e.target.result;
+
+            if (!content || !content.trim()) {
+                throw new Error('File rỗng');
+            }
+
+            const textarea = document.getElementById('promptTemplate');
+
+            if (!textarea) {
+                throw new Error('Không tìm thấy #promptTemplate');
+            }
+
+            textarea.value = content;
+
+            const promptFileName = document.getElementById('promptFileName');
+
+            if (promptFileName) {
+                promptFileName.textContent = `Nguồn: ${file.name}`;
+            }
+
+            showToast(`Đã tải prompt riêng: ${file.name}`);
+
+        } catch (error) {
+            console.error('Lỗi tải prompt riêng:', error);
+            showToast('Không thể tải nội dung prompt!');
+        }
+
+        event.target.value = '';
+    };
+
+    reader.onerror = function () {
+        console.error('Lỗi FileReader:', reader.error);
+        showToast('Không thể đọc file prompt!');
+        event.target.value = '';
+    };
+
+    reader.readAsText(file, 'UTF-8');
+}
+
 /* =========================================================
    4. LOGIC TAB 2: QUẢN LÝ VÀ TÍNH TOÁN MA TRẬN CHI TIẾT
 ========================================================= */
