@@ -104,7 +104,23 @@
                     </div>
                 </div>
             </section>
+<div class="prompt-toolbar">
+    <button type="button" class="button success" id="saveTab1ConfigBtn">
+        💾 Lưu cấu hình
+    </button>
 
+    <label class="button primary" for="importTab1ConfigFile">
+        📂 Import cấu hình
+    </label>
+
+    <input
+        type="file"
+        id="importTab1ConfigFile"
+        accept=".txt"
+	onchange="importTab1Config(event)"
+        hidden
+    >
+</div>
             <!-- 2. MA TRẬN CÂU HỎI -->
             <section class="card">
                 <div class="section-title">
@@ -363,14 +379,30 @@
                 </div>
 
                 <div class="prompt-toolbar">
-                    <label class="button primary" for="promptFile">📂 Tải prompt riêng</label>
-                    <input type="file" id="promptFile" accept=".txt,.md" hidden>
+                    <label class="button primary" for="promptFile">
+        📂 Tải prompt riêng
+    </label> 
+
+    <input 
+        type="file" 
+        id="promptFile" 
+        accept=".txt,.md" 
+        hidden
+        onchange="loadCustomPrompt(event)"
+    >         
 
                     <button type="button" class="button error" id="resetPromptBtn">↺ Dùng Prompt mặc định</button>
                     <button type="button" id="downloadDefaultPromptBtn" class="button error" onclick="downloadDefaultPrompt()">⬇ Tải prompt mẫu</button>
                 </div>
 
-                <textarea id="promptTemplate" class="prompt-template" rows="5" spellcheck="false" placeholder="Đang tải prompt mẫu..."></textarea>
+                <textarea
+    id="promptTemplate"
+    class="prompt-template"
+    rows="5"
+    spellcheck="false"
+    autocomplete="off"
+    placeholder="Đang tải prompt mẫu..."
+></textarea>
                 
                 <div id="promptFileName" class="file-info">Nguồn: đang tải...</div>
             </section>
