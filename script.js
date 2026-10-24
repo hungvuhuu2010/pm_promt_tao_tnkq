@@ -406,6 +406,13 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateMatrixTotals();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+    setupEventListeners();
+    calculateMatrixTotals();
+    attachSmartPasteListeners(); // <--- Kích hoạt tính năng dán thông minh theo cột
+});
+
 function initApp() {
     // Tải prompt mặc định cho Tab 1, Tab 2, Tab 3
     loadDefaultPrompt();
@@ -485,7 +492,7 @@ function applyDefaultPromptToUI() {
     const textarea = document.getElementById('promptTemplate');
     if (textarea) {
         textarea.value = state.defaultPrompt;
-		const promptFileName = document.getElementById('promptFileName');
+	const promptFileName = document.getElementById('promptFileName');
 
             if (promptFileName) {
                 promptFileName.textContent = `Nguồn default_prompt.txt`;
@@ -1140,4 +1147,87 @@ function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+
+/* =========================================================
+   BỔ SUNG: XỬ LÝ DÁN DỮ LIỆU HÀNG LOẠT THEO CỘT (SMART PASTE)
+========================================================= */
+
+// Hàm xử lý khi dán vào một ô, tự động trải dài xuống các dòng dưới (và tự động thêm dòng nếu thiếu)
+function handleSmartPaste(e, tableId, fieldClass) {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    if (!clipboardData) return;
+    
+    const pastedText = clipboardData.getData('text');
+    // Nếu text dán vào chỉ có 1 dòng hoặc không có ký tự xuống dòng thì để mặc định của trình duyệt
+    if (!pastedText || !pastedText.includes('\n')) return; 
+
+    e.preventDefault(); // Ngăn hành vi dán mặc định vào 1 ô
+
+    const lines = pastedText.split(/\r?\n/).map(line => line.trim()).filter(line => line !== '');
+    if (lines.length === 0) return;
+
+    const currentRow = e.target.closest('tr');
+    const table = document.getElementById(tableId);
+    const tbody = table.querySelector('tbody');
+    
+    // Lấy danh sách tất cả các tr từ dòng hiện tại trở xuống
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    let startIndex = rows.indexOf(currentRow);
+
+    // Xác định sectionType dựa vào tableId
+    let sectionType = 1;
+    if (tableId === 'tableSection2') sectionType = 2;
+    else if (tableId === 'tableSection3') sectionType = 3;
+    else if (tableId === 'tableSection4') sectionType = 4;
+
+    lines.forEach((lineText, idx) => {
+        let targetRowIndex = startIndex + idx;
+        let targetRow;
+
+        // Nếu thiếu dòng thì tự động thêm dòng mới
+        if (targetRowIndex >= rows.length) {
+            addMatrixRow(tableId, sectionType);
+            // Cập nhật lại danh sách rows sau khi thêm
+            rows.length = 0;
+            Array.from(tbody.querySelectorAll('tr')).forEach(r => rows.push(r));
+        }
+
+        targetRow = rows[targetRowIndex];
+        if (targetRow) {
+            const targetInput = targetRow.querySelector('.' + fieldClass);
+            if (targetInput) {
+                targetInput.value = lineText;
+            }
+        }
+    });
+
+    calculateMatrixTotals();
+    showToast(`Đã dán thành công ${lines.length} dòng dữ liệu vào bảng!`);
+}
+
+// Gắn sự kiện paste thông minh cho các ô trong bảng ma trận chi tiết
+function attachSmartPasteListeners() {
+    const tableIds = ['tableSection1', 'tableSection2', 'tableSection3', 'tableSection4'];
+    
+    tableIds.forEach(tableId => {
+        const table = document.getElementById(tableId);
+        if (!table) return;
+
+        table.addEventListener('paste', (e) => {
+            const target = e.target;
+            if (target && target.tagName === 'INPUT' && target.type === 'text') {
+                let fieldClass = '';
+                if (target.classList.contains('cell-topic')) fieldClass = 'cell-topic';
+                else if (target.classList.contains('cell-desc')) fieldClass = 'cell-desc';
+                else if (target.classList.contains('cell-sub')) fieldClass = 'cell-sub';
+                else if (target.classList.contains('cell-stt')) fieldClass = 'cell-stt';
+
+                if (fieldClass) {
+                    handleSmartPaste(e, tableId, fieldClass);
+                }
+            }
+        });
+    });
 }
