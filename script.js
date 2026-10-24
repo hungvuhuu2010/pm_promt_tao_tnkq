@@ -816,39 +816,6 @@ function downloadTemplateMatrix() {
     showToast('Đang tải file ma trận mẫu...');
 }
 
-function handleExcelUpload(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    document.getElementById('excelFileName').textContent = `Đã chọn: ${file.name}`;
-
-    const reader = new FileReader();
-    reader.onload = function (evt) {
-        try {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const numSheets = workbook.SheetNames.length;
-
-            if (numSheets === 1) {
-                parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
-                document.querySelectorAll('#tableSection2 tbody, #tableSection3 tbody, #tableSection4 tbody')
-                        .forEach(tbody => tbody.innerHTML = '');
-            } else {
-                if (numSheets >= 1) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[0]], 'tableSection1', 1);
-                if (numSheets >= 2) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[1]], 'tableSection2', 2);
-                if (numSheets >= 3) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[2]], 'tableSection3', 3);
-                if (numSheets >= 4) parseExcelSheetToTable(workbook.Sheets[workbook.SheetNames[3]], 'tableSection4', 4);
-            }
-
-            calculateMatrixTotals();
-            showToast('Đã tải ma trận từ Excel thành công!');
-        } catch (err) {
-            console.error('Lỗi đọc file Excel:', err);
-            showToast('Lỗi đọc file Excel! Kiểm tra lại định dạng file.');
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
 
 function parseExcelSheetToTable(sheet, tableId, sectionType) {
     const table = document.getElementById(tableId);
@@ -1107,7 +1074,6 @@ document.getElementById('importTab1ConfigFile')
     matrixInputs.forEach(input => input.addEventListener('input', updateNoMatrixTotals));
 
     // Tab 2 Events
-    document.getElementById('excelMatrixFile')?.addEventListener('change', handleExcelUpload);
     document.getElementById('generateMatrixPromptBtn')?.addEventListener('click', generateMatrixPrompt);
     document.getElementById('exportMatrixExcelBtn')?.addEventListener('click', exportMatrixToExcel);
     document.getElementById('copyMatrixPromptBtn')?.addEventListener('click', () => {

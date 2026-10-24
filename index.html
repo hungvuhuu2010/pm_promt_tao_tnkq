@@ -558,21 +558,6 @@
                         <input type="text" id="matrixTopic" placeholder="Ví dụ: Ôn tập Học kỳ II">
                     </div>
                 </div>
-
-                <div class="excel-upload-box">
-                    <label for="excelMatrixFile" class="button primary">📂 Tải Ma trận từ file Excel (.xlsx)</label>
-                    <input type="file" id="excelMatrixFile" accept=".xlsx, .xls" hidden>
-
-<!-- Nút tải file mẫu mới bổ sung -->
-    <button type="button" class="button error" id="downloadTemplateMatrixBtn" onclick="downloadTemplateMatrix()">
-        ⬇ Tải file ma trận mẫu (.xlsx)
-    </button>
-
-                    <span id="excelFileName" class="file-info-text">Chưa chọn file (Tham khảo cấu trúc file <code>mau_ma_tran.xlsx</code>)</span>
-
-
-
-                </div>
             </section>
 
             <!-- 2. MA TRẬN CHI TIẾT 4 PHẦN (COLLAPSIBLE SECTIONS) -->
@@ -581,7 +566,7 @@
                     <div class="section-number">2</div>
                     <div>
                         <h2>Chi tiết Ma trận các phần câu hỏi</h2>
-                        <p>Nhập thông tin câu hỏi thủ công hoặc chỉnh sửa dữ liệu từ file Excel đã tải</p>
+                        <p>Nhập thông tin câu hỏi thủ công dán dữ liệu theo cột</p>
                     </div>
                 </div>
 
